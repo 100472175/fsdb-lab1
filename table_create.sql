@@ -1,3 +1,5 @@
+-- TODO: Naming all constraints
+
 /*
 The Products table has all the columns with Varchar 255 because we don't know the maximum length of the values.
 Except for the decaffeinated column, which is a number 1 (== True) if it is decaffeinated and 0 (== False) if it is not.
@@ -23,7 +25,9 @@ And the primary key is the combination of the format_type and the amount, which 
 CREATE TABLE Formats(
     format_type varchar(255) not null,
     amount varchar(255) not null,
-    PRIMARY KEY (format_type, amount)
+    PRIMARY KEY (format_type, amount),
+    CONSTRAINT CK_format_type CHECK (format_type IN ('capsule', 'bag', 'can', 'bottle', 'box', 'jar', 'sachet', 'sack', 'tin'))
+    
 );
 
 
@@ -79,7 +83,8 @@ CREATE TABLE REPLACEMENT_ORDERS(
     payment VARCHAR(255),
     PRIMARY KEY (reference),
     FOREIGN KEY (reference) REFERENCES Product_References(barcode),
-    FOREIGN KEY (provider) REFERENCES Providers(CIF)
+    FOREIGN KEY (provider) REFERENCES Providers(CIF),
+    CONSTRAINT CK_status CHECK (status IN ('pending', 'received', 'paid'))
 );
 
 
@@ -127,7 +132,7 @@ Create Table Addresses(
     ZIP_code CHAR(5) NOT NULL,
     town_city VARCHAR(255) NOT NULL,
     country VARCHAR(255) NOT NULL,
-    address_id NUMBER unique,
+    address_id NUMBER unique, --Todo
     PRIMARY KEY (street_type, street_name, gateway_num, ZIP_code)
 );
 
@@ -163,8 +168,8 @@ Create Table Clients(
     main_contact VARCHAR(255) NOT NULL,
     alt_contact VARCHAR(255),
     registered_client_information VARCHAR(255) NOT NULL,
-    PRIMARY KEY (main_contact),
-    FOREIGN KEY (registered_client_information) REFERENCES Registered_Clients_Informations(username)
+    CONSTRAINT PK_main_contact PRIMARY KEY (main_contact),
+    CONSTRAINT FK_registered_client_information FOREIGN KEY (registered_client_information) REFERENCES Registered_Clients_Informations(username)
 );
 
 
