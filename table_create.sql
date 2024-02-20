@@ -13,9 +13,9 @@ CREATE TABLE Products(
     origin VARCHAR(255) NOT NULL,
     roasting VARCHAR(255) NOT NULL,
     decaffeinated NUMBER(1) NOT NULL,
-    CONSTRAINT PK_name PRIMARY KEY (name),
-    CONSTRAINT CK_decaffeinated CHECK (decaffeinated IN (0, 1)).
-    CONSTRAINT CK_roating CHECK (roasting IN ('natural', 'high-roast', 'mixture'))
+    CONSTRAINT PK_products_name PRIMARY KEY (name),
+    CONSTRAINT CK_products_decaffeinated CHECK (decaffeinated IN (0, 1)),
+    CONSTRAINT CK_products_roating CHECK (roasting IN ('natural', 'high-roast', 'mixture'))
 );
 
 
@@ -27,8 +27,8 @@ And the primary key is the combination of the format_type and the amount, which 
 CREATE TABLE Formats(
     format_type varchar(255) not null,
     amount varchar(255) not null,
-    PRIMARY KEY (format_type, amount),
-    CONSTRAINT CK_format_type CHECK (format_type IN ('grain', 'roasted beans', 'ground', 'freeze-dried', 'in capsules', 'prepared'))
+    CONSTRAINT PK_formats_amount PRIMARY KEY (format_type, amount),
+    CONSTRAINT CK_formats_format_type CHECK (format_type IN ('grain', 'roasted beans', 'ground', 'freeze-dried', 'capsules', 'prepared'))
 );
 
 
@@ -43,10 +43,14 @@ Create Table Product_References(
     format_format_type VARCHAR(255) NOT NULL,
     format_amount VARCHAR(255) NOT NULL,
     price NUMBER NOT NULL,
-    stock NUMBER NOT NULL,
-    PRIMARY KEY (barcode),
-    FOREIGN KEY (product) REFERENCES Products(name),
-    FOREIGN KEY (format_format_type, format_amount) REFERENCES Formats(format_type, amount)
+    stock NUMBER DEFAULT 0 NOT NULL ,
+    min_stock NUMBER DEFAULT 5 NOT NULL,
+    max_stock NUMBER DEFAULT 15 NOT NULL, -- This will be done with triggers, as we don't know the min_stock yet.
+    CONSTRAINT PK_product_reference_barcode PRIMARY KEY (barcode),
+    CONSTRAINT FK_product_reference_product FOREIGN KEY (product) REFERENCES Products(name),
+    CONSTRAINT FK_product_reference_format_type FOREIGN KEY (format_format_type, format_amount) REFERENCES Formats(format_type, amount),
+    CONSTRAINT CK_product_reference_stock_min_stock CHECK (stock >= 0),
+    CONSTRAINT CK_product_reference_stock_max_stock CHECK (stock <= max_stock)
 );
 
 /*
@@ -58,10 +62,12 @@ Create Table Providers(
     CIF CHAR(9) NOT NULL,
     name VARCHAR(255) NOT NULL,
     sales_name VARCHAR(255) NOT NULL,
-    sales_phone CHAR(9) NOT NULL,
+    sales_phone VARCHAR(20) NOT NULL, -- Asume Cunigunda 2º does not exist con un tlf muy largo
     sales_email VARCHAR(255) NOT NULL,
     address VARCHAR(255) NOT NULL,
-    PRIMARY KEY (CIF)
+    CONSTRAINT PK_cif PRIMARY KEY (CIF),
+    CONSTRAINT CK_cif_letter CHECK (CIF LIKE '[A-Z][0-9]{8}'),
+    CONSTRAINT CK_sales_phone CHECK (sales_phone LIKE '(00|\+)[0-9]+')
     /*
     We know that all the atributes are unique but we are not going to mark them all as unique,
      as this would detriment considerably the performance of the database.
@@ -74,18 +80,18 @@ The replacement orders has the primary key as the reference, which is a foreign 
 The provider can be Null, as well as the receiving_date and the payment.
 */
 
-CREATE TABLE REPLACEMENT_ORDERS(
-    status VARCHAR(255) NOT NULL,
-    provider CHAR(9), -- This has the same type as the primary key of Providers
-    amount_units NUMBER NOT NULL,
-    order_date DATE NOT NULL,
+CREATE TABLE Replacement_Orders(
     reference NUMBER NOT NULL,
+    order_date DATE NOT NULL,
+    status VARCHAR(255) NOT NULL,
+    provider CHAR(9),
+    amount_units NUMBER NOT NULL,
     receiving_date DATE,
     payment VARCHAR(255),
-    PRIMARY KEY (reference),
-    FOREIGN KEY (reference) REFERENCES Product_References(barcode),
-    FOREIGN KEY (provider) REFERENCES Providers(CIF),
-    CONSTRAINT CK_status CHECK (status IN ('pending', 'received', 'paid'))
+    CONSTRAINT PK_reference PRIMARY KEY (reference, order_date),
+    CONSTRAINT FK_reference FOREIGN KEY (reference) REFERENCES Product_References(barcode),
+    CONSTRAINT FK_provider FOREIGN KEY (provider) REFERENCES Providers(CIF),
+    CONSTRAINT CK_status CHECK (status IN ('draft', 'placed', 'fullfiled'))
 );
 
 
@@ -156,6 +162,7 @@ Create Table Registered_Clients_Informations(
     PRIMARY KEY (username),
     FOREIGN KEY (credit_card) REFERENCES Credit_Cards(card_number),
     FOREIGN KEY (address_id) REFERENCES Addresses(address_id)
+    -- CONSTRAINT CK_loyal_discount CHECK (loyal_discount <= SYSDATE AND loyal_discount >= SYSDATE - 30)
 );
 
 
@@ -203,12 +210,14 @@ Create Table Opinions_References(
     registered_client VARCHAR(255) NOT NULL,
     score NUMBER NOT NULL,
     text_opinion VARCHAR(511) NOT NULL,
-    likes NUMBER NOT NULL,
+    likes NUMBER DEFAULT 0 NOT NULL,
     endorsement NUMBER NOT NULL,
     product_reference NUMBER NOT NULL,
     PRIMARY KEY (registered_client, product_reference),
     FOREIGN KEY (registered_client) REFERENCES Clients(main_contact),
-    FOREIGN KEY (product_reference) REFERENCES Product_References(barcode)
+    FOREIGN KEY (product_reference) REFERENCES Product_References(barcode),
+    CONSTRAINT CK_opinions_references_score CHECK (score >= 0 AND score <= 5),
+    CONSTRAINT CK_opinions_references_likes_max CHECK (likes <= 1000000000)
 );
 
 
@@ -220,10 +229,27 @@ Create Table Opinions_Products(
     registered_client VARCHAR(255) NOT NULL,
     score NUMBER NOT NULL,
     text_opinion VARCHAR(511) NOT NULL,
-    likes NUMBER NOT NULL,
+    likes NUMBER DEFAULT 0 NOT NULL,
     endorsement NUMBER NOT NULL,
     product VARCHAR(255) NOT NULL,
     PRIMARY KEY (registered_client, product),
     FOREIGN KEY (registered_client) REFERENCES Clients(main_contact),
-    FOREIGN KEY (product) REFERENCES Products(name)
+    FOREIGN KEY (product) REFERENCES Products(name),
+    CONSTRAINT CK_opinions_products_score CHECK (score >= 0 AND score <= 5),
+    CONSTRAINT CK_opinions_products_likes_max CHECK (likes <= 1000000000)
 );
+
+
+/*
+
+*/
+
+Create Table Provider_References(
+    provider char(9) not null,
+    product_reference NUMBER NOT NULL,
+    price NUMBER NOT NULL,
+    CONSTRAINT PK_provider_reference_provider_prod_reference PRIMARY KEY (provider, product_reference),
+    CONSTRAINT FK_provider_reference_provider FOREIGN KEY (provider) REFERENCES Providers(CIF),
+    CONSTRAINT FK_provider_reference_product_reference FOREIGN KEY (product_reference) REFERENCES Product_References(barcode)
+);
+
