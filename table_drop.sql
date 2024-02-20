@@ -1,0 +1,13 @@
+drop table Purchases;
+drop table Deliveries;
+drop table Opinions_References;
+drop table Opinions_Products; 
+drop table REPLACEMENT_ORDERS;
+drop table Providers;
+drop table Product_References;
+drop table Products;
+drop table Formats;
+drop table Clients;
+drop table Registered_Clients_Informations;
+drop table Credit_Cards;
+drop table Addresses; 
