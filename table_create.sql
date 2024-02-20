@@ -1,3 +1,9 @@
+/*
+The Products table has all the columns with Varchar 255 because we don't know the maximum length of the values.
+Except for the decaffeinated column, which is a number 1 (== True) if it is decaffeinated and 0 (== False) if it is not.
+And the primary key is the name of the product, which is unique.
+*/
+
 CREATE TABLE Products(
     name VARCHAR(255) NOT NULL,
     species VARCHAR(255) NOT NULL,
@@ -8,6 +14,12 @@ CREATE TABLE Products(
     PRIMARY KEY (name)
 );
 
+
+/*
+The Formats table had to have it's first atribure renamed because it was a reserved word in SQL.
+And the primary key is the combination of the format_type and the amount, which is unique.
+*/
+
 CREATE TABLE Formats(
     format_type varchar(255) not null,
     amount varchar(255) not null,
@@ -15,6 +27,10 @@ CREATE TABLE Formats(
 );
 
 
+/*
+The Product_References is the table with the barcode, the product, the format etc.
+The barcode is the primary key, and the foreign keys are the product and the format(type and amount).
+*/
 
 Create Table Product_References(
     barcode NUMBER NOT NULL,
@@ -28,10 +44,14 @@ Create Table Product_References(
     FOREIGN KEY (format_format_type, format_amount) REFERENCES Formats(format_type, amount)
 );
 
+/*
+The providers table has the CIF as the primary key.
+The only atribute we know the length of is the sales_phone, which is a char(9). 
+*/
 
 Create Table Providers(
-    name VARCHAR(255) NOT NULL,
     CIF CHAR(9) NOT NULL,
+    name VARCHAR(255) NOT NULL,
     sales_name VARCHAR(255) NOT NULL,
     sales_phone CHAR(9) NOT NULL,
     sales_email VARCHAR(255) NOT NULL,
@@ -43,6 +63,12 @@ Create Table Providers(
     */
 );
 
+
+/*
+The replacement orders has the primary key as the reference, which is a foreign key to the Product_References table.
+The provider can be Null, as well as the receiving_date and the payment.
+*/
+
 CREATE TABLE REPLACEMENT_ORDERS(
     status VARCHAR(255) NOT NULL,
     provider CHAR(9), -- This has the same type as the primary key of Providers
@@ -52,10 +78,14 @@ CREATE TABLE REPLACEMENT_ORDERS(
     receiving_date DATE,
     payment VARCHAR(255),
     PRIMARY KEY (reference),
-    FOREIGN KEY (provider) REFERENCES Providers(CIF),
-    FOREIGN KEY (reference) REFERENCES Product_References(barcode)
+    FOREIGN KEY (reference) REFERENCES Product_References(barcode),
+    FOREIGN KEY (provider) REFERENCES Providers(CIF)
 );
 
+
+/*
+The deliveries table is a combination of the delivery_date and the delivery_address, which is unique.
+*/
 
 CREATE TABLE Deliveries(
     delivery_date DATE NOT NULL,
@@ -80,6 +110,12 @@ Create Table Credit_Cards(
     PRIMARY KEY (card_number)
 );
 
+
+/*
+The only important aspect of the Adresses table is that the adress_id is unique.
+Here is where I have some doubt of how can we do this.
+*/
+
 Create Table Addresses(
     street_type VARCHAR(255) NOT NULL,
     street_name VARCHAR(255) NOT NULL,
@@ -94,6 +130,12 @@ Create Table Addresses(
     address_id NUMBER unique,
     PRIMARY KEY (street_type, street_name, gateway_num, ZIP_code)
 );
+
+
+/*
+Here, what we discus with the professor was applied. We cerated a contact_media and a contact_media_alternative.
+The main is the one that will be always populated, and if the alternative is populated, the main one will be phone and the second one the email.
+*/
 
 Create Table Registered_Clients_Informations(
     username VARCHAR(255) NOT NULL,
@@ -110,6 +152,13 @@ Create Table Registered_Clients_Informations(
     FOREIGN KEY (address_id) REFERENCES Addresses(address_id)
 );
 
+
+/* 
+The client table, is a mixture of the registered and unregistered clients.
+The primary key is the main_contact, as it will be unique in both registered and unregistered clients.
+And the main information of the client is in the Registered_Clients_Informations table.
+*/
+
 Create Table Clients(
     main_contact VARCHAR(255) NOT NULL,
     alt_contact VARCHAR(255),
@@ -117,6 +166,11 @@ Create Table Clients(
     PRIMARY KEY (main_contact),
     FOREIGN KEY (registered_client_information) REFERENCES Registered_Clients_Informations(username)
 );
+
+
+/*
+
+*/
 
 Create Table Purchases(
     amount NUMBER NOT NULL,
@@ -134,6 +188,11 @@ Create Table Purchases(
     FOREIGN KEY (product_reference) REFERENCES Product_References(barcode)
 );
 
+
+/*
+
+*/
+
 Create Table Opinions_References(
     registered_client VARCHAR(255) NOT NULL,
     score NUMBER NOT NULL,
@@ -145,6 +204,11 @@ Create Table Opinions_References(
     FOREIGN KEY (registered_client) REFERENCES Clients(main_contact),
     FOREIGN KEY (product_reference) REFERENCES Product_References(barcode)
 );
+
+
+/*
+
+*/
 
 Create Table Opinions_Products(
     registered_client VARCHAR(255) NOT NULL,
