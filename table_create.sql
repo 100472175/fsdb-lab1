@@ -13,7 +13,9 @@ CREATE TABLE Products(
     origin VARCHAR(255) NOT NULL,
     roasting VARCHAR(255) NOT NULL,
     decaffeinated NUMBER(1) NOT NULL,
-    PRIMARY KEY (name)
+    CONSTRAINT PK_name PRIMARY KEY (name),
+    CONSTRAINT CK_decaffeinated CHECK (decaffeinated IN (0, 1)).
+    CONSTRAINT CK_roating CHECK (roasting IN ('natural', 'high-roast', 'mixture'))
 );
 
 
@@ -26,8 +28,7 @@ CREATE TABLE Formats(
     format_type varchar(255) not null,
     amount varchar(255) not null,
     PRIMARY KEY (format_type, amount),
-    CONSTRAINT CK_format_type CHECK (format_type IN ('capsule', 'bag', 'can', 'bottle', 'box', 'jar', 'sachet', 'sack', 'tin'))
-    
+    CONSTRAINT CK_format_type CHECK (format_type IN ('grain', 'roasted beans', 'ground', 'freeze-dried', 'in capsules', 'prepared'))
 );
 
 
