@@ -1,6 +1,6 @@
 Table creation:
 
-Copy the content of the file [table_create.sql](./table_create.sql) and [table_drop.sql](./table_drop.sql) by dragging and dropiing or copying the raw content.
+Copy the content of the file [table_create.sql](./table_create.sql) and [table_drop.sql](./table_drop.sql) by dragging and dropping or copying the raw content.
 
 Execute the file in sqplus like this:
 

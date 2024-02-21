@@ -1,14 +1,14 @@
-drop table Provider_References;
 drop table Opinions_Products;
 drop table Opinions_References;
 drop table Purchases; 
 drop table Clients;
 drop table Registered_Clients_Informations;
-drop table Addresses;
 drop table Credit_Cards;
 drop table Deliveries;
+drop table Providers_References;
 drop table Replacement_Orders;
 drop table Providers;
+drop table Addresses;
 drop table Product_References;
 drop table Formats;
 drop table Products; 
