@@ -63,14 +63,13 @@ Create Table Addresses(
     street_type VARCHAR(255) NOT NULL,
     street_name VARCHAR(255) NOT NULL,
     gateway_num NUMBER NOT NULL,
-    block_num NUMBER NOT NULL,
+    block_num NUMBER,
     stairs_id CHAR(5),
-    floor NUMBER NOT NULL,
-    door CHAR(1) NOT NULL,
+    floor NUMBER,
+    door CHAR(1),
     ZIP_code CHAR(5) NOT NULL,
-    town_city VARCHAR(255) NOT NULL,
-    country VARCHAR(255) NOT NULL,
-    CONSTRAINT PK_addresses PRIMARY KEY (street_name, gateway_num, floor, door, ZIP_code),
+    city_country VARCHAR(255) NOT NULL,
+    CONSTRAINT PK_addresses PRIMARY KEY (street_name, town_city),
     CONSTRAINT CK_address_ZIP_code CHECK (ZIP_code LIKE '[0-9]{5}')
 );
 
@@ -86,16 +85,10 @@ Create Table Providers(
     sales_name VARCHAR(255) NOT NULL,
     sales_phone VARCHAR(20) NOT NULL,
     sales_email VARCHAR(255) NOT NULL,
-    provider_adress_street_name VARCHAR(255) NOT NULL,    
-    provider_adress_gateway_num NUMBER NOT NULL,    
-    provider_adress_floor NUMBER NOT NULL,    
-    provider_adress_door CHAR(1) NOT NULL,    
-    provider_adress_ZIP_code CHAR(5) NOT NULL,    
+    provider_adress VARCHAR(255) NOT NULL,    
     CONSTRAINT PK_cif PRIMARY KEY (CIF),
-    CONSTRAINT FK_provider_adress FOREIGN KEY (provider_adress_street_name, provider_adress_gateway_num, provider_adress_floor, provider_adress_door, provider_adress_ZIP_code) REFERENCES Addresses(street_name, gateway_num, floor, door, ZIP_code),
     CONSTRAINT CK_cif_letter CHECK (CIF LIKE '[A-Z][0-9]{8}'),
-    CONSTRAINT CK_sales_phone CHECK (sales_phone LIKE '(00|\+)[0-9]+'),
-    CONSTRAINT CK_provider_adress_ZIP_code CHECK (provider_adress_ZIP_code LIKE '[0-9]{5}')
+    CONSTRAINT CK_sales_phone CHECK (sales_phone LIKE '(00|\+)[0-9]+')
     /*
     We know that all the atributes are unique but we are not going to mark them all as unique,
      as this would detriment considerably the performance of the database.
@@ -145,12 +138,9 @@ The deliveries table is a combination of the delivery_date and the delivery_addr
 CREATE TABLE Deliveries(
     delivery_date DATE NOT NULL,
     delivery_address_street_name VARCHAR(255) NOT NULL,
-    delivery_address_gateway_num NUMBER NOT NULL,
-    delivery_address_floor NUMBER NOT NULL,
-    delivery_address_door CHAR(1) NOT NULL,
-    delivery_address_ZIP_code CHAR(5) NOT NULL,
-    CONSTRAINT PK_Deliveries PRIMARY KEY (delivery_date, delivery_address_street_name, delivery_address_gateway_num, delivery_address_floor, delivery_address_door, delivery_address_ZIP_code),
-    CONSTRAINT FK_deliveries_maxi FOREIGN KEY (delivery_address_street_name, delivery_address_gateway_num, delivery_address_floor, delivery_address_door, delivery_address_ZIP_code) REFERENCES Addresses(street_name, gateway_num, floor, door, ZIP_code)
+    delivery_address_city_country VARCHAR(255) NOT NULL,
+    CONSTRAINT PK_Deliveries PRIMARY KEY (delivery_date, delivery_address_street_name, delivery_address_city_country),
+    CONSTRAINT FK_deliveries_maxi FOREIGN KEY (delivery_address_street_name, delivery_address_city_country) REFERENCES Addresses(street_name, city_country )
 );
 
 /*
@@ -177,7 +167,7 @@ Here, what we discus with the professor was applied. We cerated a contact_media 
 The main is the one that will be always populated, and if the alternative is populated, the main one will be phone and the second one the email.
 */
 
-Create Table Registered_Clients_Informations(
+create Table Registered_Clients_Informations(
     username VARCHAR(255) NOT NULL,
     client_password VARCHAR(255) NOT NULL,
     registration_date DATE NOT NULL,
@@ -185,13 +175,10 @@ Create Table Registered_Clients_Informations(
     loyal_discount VARCHAR(255),
     credit_card CHAR(16) NOT NULL,
     rci_address_street_name VARCHAR(255) NOT NULL, -- rci <===> registered client information
-    rci_address_gateway_num NUMBER NOT NULL,
-    rci_address_floor NUMBER NOT NULL,
-    rci_address_door CHAR(1) NOT NULL,
-    rci_address_ZIP_code CHAR(5) NOT NULL,
+    rci_address_city_country  VARCHAR(255) NOT NULL,
     CONSTRAINT PK_rci PRIMARY KEY (username),
     CONSTRAINT FK_rci_credit_card FOREIGN KEY (credit_card) REFERENCES Credit_Cards(card_number),
-    CONSTRAINT FK_rci_address FOREIGN KEY (rci_address_street_name, rci_address_gateway_num, rci_address_floor, rci_address_door, rci_address_ZIP_code) REFERENCES Addresses(street_name, gateway_num, floor, door, ZIP_code),
+    CONSTRAINT FK_rci_address FOREIGN KEY (rci_address_street_name, rci_adress_city_country ) REFERENCES Addresses(street_name, city_country ),
     CONSTRAINT CK_rci_ZIP_code CHECK (rci_address_ZIP_code LIKE '[0-9]{5}')
     -- CONSTRAINT CK_loyal_discount CHECK (loyal_discount <= SYSDATE AND loyal_discount >= SYSDATE - 30)
 );
@@ -218,24 +205,19 @@ Create Table Clients(
 
 Create Table Purchases(
     costumer VARCHAR(255) NOT NULL,
-    delivery_address VARCHAR(255) NOT NULL,
     delivery_date DATE NOT NULL,
     purchases_address_street_name VARCHAR(255) NOT NULL,
-    purchases_address_gateway_num NUMBER NOT NULL,
-    purchases_address_floor NUMBER NOT NULL,
-    purchases_address_door CHAR(1) NOT NULL,
-    purchases_address_ZIP_code CHAR(5) NOT NULL,
+    purchases_address_city_country VARCHAR(255) NOT NULL,
     product_reference NUMBER NOT NULL,
     amount NUMBER NOT NULL,
     payment_date DATE,
     payment_type VARCHAR(255) NOT NULL,
-    card_data VARCHAR(255),
+    card_data CHAR(16),
     total_price NUMBER NOT NULL,
-    CONSTRAINT PK_purchases PRIMARY KEY (costumer, delivery_date, purchases_address_street_name, purchases_address_gateway_num, purchases_address_floor, purchases_address_ZIP_code, product_reference),
+    CONSTRAINT PK_purchases PRIMARY KEY (costumer, delivery_date, purchases_address_street_name, purchases_address_city_country, product_reference),
     CONSTRAINT FK_purchases_costumer FOREIGN KEY (costumer) REFERENCES Clients(main_contact),
-    CONSTRAINT FK_purchases_divery_adress FOREIGN KEY (delivery_date, purchases_address_street_name, purchases_address_gateway_num, purchases_address_floor, purchases_address_door, purchases_address_ZIP_code) REFERENCES Deliveries(delivery_date, delivery_address_street_name, delivery_address_gateway_num, delivery_address_floor, delivery_address_door, delivery_address_ZIP_code),
-    CONSTRAINT FK_purchases_product_reference FOREIGN KEY (product_reference) REFERENCES Product_References(barcode),
-    CONSTRAINT CK_purchases_adresses_zip_code CHECK (purchases_address_ZIP_code LIKE '[0-9]{5}')
+    CONSTRAINT FK_purchases_divery_adress FOREIGN KEY (delivery_date, purchases_address_street_name, purchases_address_city_country ) REFERENCES Deliveries(delivery_date, delivery_address_street_name, city_country),
+    CONSTRAINT FK_purchases_product_reference FOREIGN KEY (product_reference) REFERENCES Product_References(barcode)
 );
 
 
