@@ -69,7 +69,7 @@ Create Table Addresses(
     door CHAR(1),
     ZIP_code CHAR(5) NOT NULL,
     city_country VARCHAR(255) NOT NULL,
-    CONSTRAINT PK_addresses PRIMARY KEY (street_name, town_city),
+    CONSTRAINT PK_addresses PRIMARY KEY (street_name, city_country),
     CONSTRAINT CK_address_ZIP_code CHECK (ZIP_code LIKE '[0-9]{5}')
 );
 
@@ -175,11 +175,10 @@ create Table Registered_Clients_Informations(
     loyal_discount VARCHAR(255),
     credit_card CHAR(16) NOT NULL,
     rci_address_street_name VARCHAR(255) NOT NULL, -- rci <===> registered client information
-    rci_address_city_country  VARCHAR(255) NOT NULL,
+    rci_address_city_country VARCHAR(255) NOT NULL,
     CONSTRAINT PK_rci PRIMARY KEY (username),
     CONSTRAINT FK_rci_credit_card FOREIGN KEY (credit_card) REFERENCES Credit_Cards(card_number),
-    CONSTRAINT FK_rci_address FOREIGN KEY (rci_address_street_name, rci_adress_city_country ) REFERENCES Addresses(street_name, city_country ),
-    CONSTRAINT CK_rci_ZIP_code CHECK (rci_address_ZIP_code LIKE '[0-9]{5}')
+    CONSTRAINT FK_rci_address FOREIGN KEY (rci_address_street_name, rci_address_city_country) REFERENCES Addresses(street_name, city_country )
     -- CONSTRAINT CK_loyal_discount CHECK (loyal_discount <= SYSDATE AND loyal_discount >= SYSDATE - 30)
 );
 
@@ -216,7 +215,7 @@ Create Table Purchases(
     total_price NUMBER NOT NULL,
     CONSTRAINT PK_purchases PRIMARY KEY (costumer, delivery_date, purchases_address_street_name, purchases_address_city_country, product_reference),
     CONSTRAINT FK_purchases_costumer FOREIGN KEY (costumer) REFERENCES Clients(main_contact),
-    CONSTRAINT FK_purchases_divery_adress FOREIGN KEY (delivery_date, purchases_address_street_name, purchases_address_city_country ) REFERENCES Deliveries(delivery_date, delivery_address_street_name, city_country),
+    CONSTRAINT FK_purchases_divery_adress FOREIGN KEY (delivery_date, purchases_address_street_name, purchases_address_city_country ) REFERENCES Deliveries(delivery_date, delivery_address_street_name, delivery_address_city_country),
     CONSTRAINT FK_purchases_product_reference FOREIGN KEY (product_reference) REFERENCES Product_References(barcode)
 );
 
