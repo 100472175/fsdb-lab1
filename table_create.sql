@@ -15,7 +15,7 @@ CREATE TABLE Products(
     decaffeinated NUMBER(1) NOT NULL,
     CONSTRAINT PK_products_name PRIMARY KEY (name),
     CONSTRAINT CK_products_decaffeinated CHECK (decaffeinated IN (0, 1)),
-    CONSTRAINT CK_products_roating CHECK (roasting IN ('natural', 'high-roast', 'mixture'))
+    CONSTRAINT CK_products_roasting CHECK (roasting IN ('natural', 'high-roast', 'mixture'))
 );
 
 
