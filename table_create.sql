@@ -25,10 +25,10 @@ And the primary key is the combination of the format_type and the amount, which 
 */
 
 CREATE TABLE Formats(
-    format_type varchar(255) not null,
+    format_type_f varchar(255) not null,
     amount varchar(255) not null,
-    CONSTRAINT PK_formats_amount PRIMARY KEY (format_type, amount),
-    CONSTRAINT CK_formats_format_type CHECK (format_type IN ('raw grain', 'roasted beans', 'ground', 'freeze-dried', 'capsules', 'prepared'))
+    CONSTRAINT PK_formats_amount PRIMARY KEY (format_type_f, amount),
+    CONSTRAINT CK_formats_format_type CHECK (format_type_f IN ('raw grain', 'roasted beans', 'ground', 'freeze dried', 'capsules', 'prepared'))
 );
 
 
@@ -48,7 +48,7 @@ Create Table Product_References(
     max_stock NUMBER DEFAULT 15 NOT NULL, -- This will be done with triggers, as we don't know the min_stock yet.
     CONSTRAINT PK_product_reference_barcode PRIMARY KEY (barcode),
     CONSTRAINT FK_product_reference_product FOREIGN KEY (product) REFERENCES Products(name),
-    CONSTRAINT FK_product_reference_format_type FOREIGN KEY (format_format_type, format_amount) REFERENCES Formats(format_type, amount),
+    CONSTRAINT FK_product_reference_format_type FOREIGN KEY (format_format_type, format_amount) REFERENCES Formats(format_type_f, amount),
     CONSTRAINT CK_product_reference_stock_min_stock CHECK (stock >= 0),
     CONSTRAINT CK_product_reference_stock_max_stock CHECK (stock <= max_stock)
 );

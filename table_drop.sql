@@ -11,4 +11,4 @@ drop table Providers;
 drop table Addresses;
 drop table Product_References;
 drop table Formats;
-drop table Products; 
+drop table Products;
