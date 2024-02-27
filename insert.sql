@@ -28,6 +28,27 @@ INSERT INTO FORMATS(
             WHEN PRODTYPE is not null and PRODTYPE like 'capsules%' THEN 'capsules'
             WHEN PRODTYPE is not null and PRODTYPE like 'prepared%' THEN 'prepared'
         END as format,
-        packaging
+        packaging 
     from fsdb.trolley);
 
+-- 3º Insert into Product References
+
+Select distinct
+    barcode,
+    product,
+    CASE 
+        WHEN PRODTYPE is not null and PRODTYPE like 'raw%' THEN 'raw grain'
+        WHEN PRODTYPE is not null and PRODTYPE like 'roasted%' THEN 'roasted beans'
+        WHEN PRODTYPE is not null and PRODTYPE like 'ground%' THEN 'ground'
+        WHEN PRODTYPE is not null and PRODTYPE like 'freeze%' THEN 'freeze dried'
+        WHEN PRODTYPE is not null and PRODTYPE like 'capsules%' THEN 'capsules'
+        WHEN PRODTYPE is not null and PRODTYPE like 'prepared%' THEN 'prepared'
+    END as format,
+    packaging,
+    base_price,
+    QUANTITY
+from fsdb.trolley where barcode is not null 
+                    and product is not null 
+                    and packaging is not null 
+                    and base_price is not null 
+                    and QUANTITY is not null;

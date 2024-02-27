@@ -38,7 +38,7 @@ The barcode is the primary key, and the foreign keys are the product and the for
 */
 
 Create Table Product_References(
-    barcode NUMBER NOT NULL,
+    barcode VARCHAR(255) NOT NULL,
     product VARCHAR(255) NOT NULL,
     format_format_type VARCHAR(255) NOT NULL,
     format_amount VARCHAR(255) NOT NULL,
@@ -103,7 +103,7 @@ The provider can be Null, as well as the receiving_date and the payment.
 
 CREATE TABLE Replacement_Orders(
     order_date DATE NOT NULL,
-    reference NUMBER NOT NULL,
+    reference VARCHAR(255) NOT NULL,
     order_status VARCHAR(255) NOT NULL,
     provider_cif CHAR(9),
     amount_units NUMBER NOT NULL,
@@ -121,7 +121,7 @@ CREATE TABLE Replacement_Orders(
 
 Create Table Providers_References(
     provider_cif char(9) not null,
-    product_reference NUMBER NOT NULL,
+    product_reference VARCHAR(255) NOT NULL,
     price NUMBER NOT NULL,
     CONSTRAINT PK_providers_reference_provider_prod_reference PRIMARY KEY (provider_cif, product_reference),
     CONSTRAINT FK_providers_reference_provider FOREIGN KEY (provider_cif) REFERENCES Providers(CIF),
