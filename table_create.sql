@@ -28,7 +28,7 @@ CREATE TABLE Formats(
     format_type varchar(255) not null,
     amount varchar(255) not null,
     CONSTRAINT PK_formats_amount PRIMARY KEY (format_type, amount),
-    CONSTRAINT CK_formats_format_type CHECK (format_type IN ('grain', 'roasted beans', 'ground', 'freeze-dried', 'capsules', 'prepared'))
+    CONSTRAINT CK_formats_format_type CHECK (format_type IN ('raw grain', 'roasted beans', 'ground', 'freeze-dried', 'capsules', 'prepared'))
 );
 
 
