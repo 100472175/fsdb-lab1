@@ -83,3 +83,14 @@ from fsdb.catalogue where PROV_TAXID is not null
                     and PROV_PERSON is not null 
                     and PROV_MOBILE is not null;
 
+
+-- 5º Insert into Product Providers
+INSERT INTO Providers_References (provider_cif, product_reference, price)
+Select distinct
+    PROV_TAXID,
+    barcode,
+    to_number(regexp_replace(regexp_replace(retail_price, '[^0-9.]', ''), '[.]', ',')) as price
+from fsdb.catalogue where PROV_TAXID is not null 
+                    and barcode is not null 
+                    and retail_price is not null;
+
