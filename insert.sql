@@ -1,4 +1,4 @@
--- 1th Insert into products
+-- 1st Insert into products
 INSERT INTO PRODUCTS(name, species, variety, origin, roasting, decaffeinated)
     SELECT distinct
         product,
@@ -23,7 +23,7 @@ INSERT INTO PRODUCTS(name, species, variety, origin, roasting, decaffeinated)
         AND decaf IS NOT NULL;
 
 
--- 2th Insert into Formats
+-- 2nd Insert into Formats
 INSERT INTO FORMATS(format_type_f, amount)
     SELECT distinct
         CASE 
@@ -66,7 +66,7 @@ from fsdb.catalogue where barcode is not null
                     and MAX_STOCK is not null;
 
 -- 4th Insert into Providers
-INSERT INTO Providers (CIF, provider_name, sales_phone, sales_email, sales_name, provider_adress)
+INSERT INTO Providers (CIF, provider_name, sales_phone, sales_email, sales_name, provider_address)
 Select distinct
     PROV_TAXID, 
     SUPPLIER,
@@ -115,3 +115,43 @@ JOIN fsdb.catalogue c ON t.barcode = c.barcode;
 */
 
 -- select count(BILL_TOWN) from fsdb.trolley;
+-- 7th insert Addresses
+/*
+Comments: 
+    - We are taking the n/n from the bill_gate and substituting it for null.
+    - We are also taking the floor and substituting it for a number, if it is a number, or null if it is not.
+    - We are taking the city and country and joining them together to generate the city_country.
+*/
+
+INSERT INTO Addresses (username, street_type, street_name, gateway_num, block_num, stairs_id, floor, door, ZIP_code, city_country)
+select distinct
+    username,
+    bill_waytype,
+    bill_wayname,
+    CASE
+        WHEN REGEXP_LIKE(TRIM(bill_gate), '^[0-9]+$') THEN TO_NUMBER(TRIM(bill_gate))
+        ELSE null
+    END as bill_gate,
+    bill_block,
+    bill_stairw,
+    CASE
+        WHEN bill_floor IS NOT NULL AND bill_floor LIKE 'First%' THEN '1' 
+        WHEN bill_floor IS NOT NULL AND bill_floor LIKE 'Second%' THEN '2'
+        WHEN bill_floor IS NOT NULL AND bill_floor LIKE 'Third%' THEN '3'
+        WHEN bill_floor IS NOT NULL AND bill_floor LIKE 'Fourth%' THEN '4'
+        WHEN bill_floor IS NOT NULL AND bill_floor LIKE 'Fifth%' THEN '5'
+        WHEN bill_floor IS NOT NULL AND bill_floor LIKE 'Sixth%' THEN '6'
+        WHEN bill_floor IS NOT NULL AND bill_floor LIKE 'Ground%' THEN '0'
+        WHEN REGEXP_LIKE(TRIM(bill_floor), '^[0-9]+$') THEN TRIM(bill_floor)
+        ELSE null
+    END as floor_num,
+    bill_door,
+    bill_zip,
+    TRIm(bill_town) || ', ' || TRIM(bill_country) as city_country
+    from fsdb.trolley where username is not null 
+                        and bill_waytype is not null
+                        and bill_wayname is not null
+                        and bill_gate is not null
+                        and bill_zip is not null
+                        and bill_country is not null;
+

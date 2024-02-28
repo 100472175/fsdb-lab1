@@ -81,7 +81,7 @@ Create Table Providers(
     sales_name CHAR(90) NOT NULL,
     sales_phone CHAR(9) NOT NULL,
     sales_email CHAR(60) NOT NULL,
-    provider_adress CHAR(120) NOT NULL,    
+    provider_address CHAR(120) NOT NULL,    
     CONSTRAINT PK_cif PRIMARY KEY (CIF),
     CONSTRAINT CK_cif_letter CHECK (REGEXP_LIKE(CIF, '[A-Z][0-9]{8}')),
     CONSTRAINT CK_sales_phone CHECK (REGEXP_LIKE(sales_phone, '^[0-9]+$'))
@@ -95,21 +95,22 @@ Create Table Providers(
 /*
 The only important aspect of the Adresses table is that the adress_id is unique.
 Here is where I have some doubt of how can we do this.
-TODO IMPORTANTE
+This will store the billing addresses while the delivery addresses will be stored in the Purchases Table.
 */
 
 Create Table Addresses(
+    username VARCHAR(255) NOT NULL,
     street_type VARCHAR(255) NOT NULL,
     street_name VARCHAR(255) NOT NULL,
-    gateway_num NUMBER NOT NULL,
+    gateway_num NUMBER,
     block_num NUMBER,
     stairs_id CHAR(5),
     floor NUMBER,
     door CHAR(1),
     ZIP_code CHAR(5) NOT NULL,
     city_country VARCHAR(255) NOT NULL,
-    CONSTRAINT PK_addresses PRIMARY KEY (street_name, city_country),
-    CONSTRAINT CK_address_ZIP_code CHECK (ZIP_code LIKE '[0-9]{5}')
+    CONSTRAINT PK_addresses PRIMARY KEY (username, city_country),
+    CONSTRAINT CK_address_ZIP_code CHECK (REGEXP_LIKE(ZIP_code, '[0-9]{5}'))
 );
 
 
@@ -173,7 +174,7 @@ Create Table Credit_Cards(
     holder VARCHAR(255) NOT NULL,
     finance_company VARCHAR(255) NOT NULL,
     CONSTRAINT PK_Credit_card PRIMARY KEY (card_number),
-    CONSTRAINT CK_card_number CHECK (card_number LIKE '[0-9]{16}')
+    CONSTRAINT CK_card_number CHECK (REGEXP_LIKE(card_number, '[0-9]{16}'))
 );
 
 
@@ -218,17 +219,16 @@ Create Table Clients(
 Create Table Purchases(
     costumer VARCHAR(255) NOT NULL,
     delivery_date DATE NOT NULL,
-    purchases_address_street_name VARCHAR(255) NOT NULL,
-    purchases_address_city_country VARCHAR(255) NOT NULL,
+    purchases_address VARCHAR(255) NOT NULL,
     product_reference CHAR(15) NOT NULL,
     amount NUMBER NOT NULL,
     payment_date DATE,
     payment_type VARCHAR(255) NOT NULL,
     card_data CHAR(16),
     total_price NUMBER NOT NULL,
-    CONSTRAINT PK_purchases PRIMARY KEY (costumer, delivery_date, purchases_address_street_name, purchases_address_city_country, product_reference),
+    CONSTRAINT PK_purchases PRIMARY KEY (costumer, delivery_date, purchases_address, product_reference),
     CONSTRAINT FK_purchases_costumer FOREIGN KEY (costumer) REFERENCES Clients(main_contact),
-    CONSTRAINT FK_purchases_divery_adress FOREIGN KEY (delivery_date, purchases_address_street_name, purchases_address_city_country ) REFERENCES Deliveries(delivery_date, delivery_address_street_name, delivery_address_city_country),
+    CONSTRAINT FK_purchases_divery_adress FOREIGN KEY (delivery_date, purchases_address) REFERENCES Deliveries(delivery_date, delivery_address),
     CONSTRAINT FK_purchases_product_reference FOREIGN KEY (product_reference) REFERENCES Product_References(barcode)
 );
 
