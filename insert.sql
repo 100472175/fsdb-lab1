@@ -145,14 +145,23 @@ SELECT DISTINCT
 
 
 -- 7th Insert into Product Providers
-INSERT INTO Providers_References (provider_cif, product_reference, price)
+INSERT INTO Providers_References(provider_cif, product_reference, price)
     Select distinct
         PROV_TAXID,
         barcode,
-        to_number(regexp_replace(regexp_replace(cost_price, '[^0-9.]', ''), '[.]', ',')) as price
+        CASE 
+            WHEN (barcode = 'OII22831Q738220' AND PROV_TAXID = 'V16878068R') THEN 18.03
+            WHEN (barcode = 'IIO51869I990018' AND PROV_TAXID = 'D14430184F') THEN 81.13
+            WHEN (barcode = 'OQI13224O987826' AND PROV_TAXID = 'B29558354L') THEN 3.42
+            WHEN (barcode = 'QOO64416O550165' AND PROV_TAXID = 'N13525202Y') THEN 5.56
+            WHEN (barcode = 'QII47432I109160' AND PROV_TAXID = 'R63301935R') THEN 5.63
+            ELSE to_number(regexp_replace(regexp_replace(cost_price, '[^0-9.]', ''), '[.]', ','))
+        END as price
     from fsdb.catalogue where PROV_TAXID is not null 
                         and barcode is not null 
                         and cost_price is not null;
+
+
 
 
 
@@ -197,8 +206,49 @@ WHERE dliv_date IS NOT NULL;
 
 
 
--- Credit_Cards
+
+
+
+
 -- Registered_Clients_Informations
+
+INSERT INTO Registered_Clients_Informations (username, client_password, registration_date, peronal_data, loyal_discount)
+    SELECT
+        username,
+        MIN(user_passw) AS user_passw,
+        MIN(TO_DATE(reg_date, 'YYYY/MM/DD')) AS registration_date,
+        MIN(TRIM(client_name || ' ' || client_surn1 || ' ' || client_surn2)) AS full_name,
+        MIN(discount) AS discount
+    FROM fsdb.trolley
+    WHERE username IS NOT NULL 
+        AND user_passw IS NOT NULL 
+        AND reg_date IS NOT NULL 
+        AND client_name IS NOT NULL 
+        AND client_surn1 IS NOT NULL 
+        AND discount IS NOT NULL 
+    GROUP BY
+        username
+    Order by
+        username;
+            
+
+
+-- Credit_Cards
+INSERT INTO Credit_Cards (card_number, expiration_date, holder, finance_company, username)
+Select distinct
+    card_number,
+    to_date(card_expiratn, 'MM/YY') as card_expiration,
+    card_holder,
+    card_company,
+    username
+from fsdb.trolley where card_number is not null AND (length(card_number) > 0)
+                    and card_expiratn is not null 
+                    and card_holder is not null 
+                    and card_company is not null
+                    and username is not null;
+
+
+
 -- Clients
 -- Purchases
 -- Opinions_References
@@ -213,3 +263,21 @@ INSERT INTO Opinions_Products(registered_client,product, score, text_opinion, li
     from fsdb.posts A, Registered_Clients_Informations B, Products C
     where A.USERNAME = B.username and A.product = C.name;
 
+
+/*
+Check wich ones had problems, aka, there are two prices for the same cif and barcode.
+Select PROV_TAXID, barcode, cost_price 
+    from fsdb.catalogue 
+        where barcode IN 
+        ('QOO64416O550165',
+         'IIO51869I990018',
+         'OQI13224O987826',
+         'OII22831Q738220',
+         'QII47432I109160');
+
+V16878068R OII22831Q738220 18.03 ? --
+D14430184F IIO51869I990018 81.13 ?--
+B29558354L OQI13224O987826 3.42 ? --
+N13525202Y QOO64416O550165 5.56 ? --
+R63301935R QII47432I109160 5.63 ? --
+*/
