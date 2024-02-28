@@ -121,7 +121,7 @@ The provider can be Null, as well as the receiving_date and the payment.
 CREATE TABLE Replacement_Orders(
     order_date DATE NOT NULL,
     reference CHAR(15) NOT NULL,
-    order_status VARCHAR(255) NOT NULL,
+    order_status VARCHAR(255) DEFAULT 'fullfiled' NOT NULL,
     provider_cif CHAR(10),
     amount_units NUMBER NOT NULL,
     receiving_date DATE,
@@ -154,10 +154,8 @@ The deliveries table is a combination of the delivery_date and the delivery_addr
 
 CREATE TABLE Deliveries(
     delivery_date DATE NOT NULL,
-    delivery_address_street_name VARCHAR(255) NOT NULL,
-    delivery_address_city_country VARCHAR(255) NOT NULL,
-    CONSTRAINT PK_Deliveries PRIMARY KEY (delivery_date, delivery_address_street_name, delivery_address_city_country),
-    CONSTRAINT FK_deliveries_maxi FOREIGN KEY (delivery_address_street_name, delivery_address_city_country) REFERENCES Addresses(street_name, city_country )
+    delivery_address VARCHAR(255) NOT NULL,
+    CONSTRAINT PK_Deliveries PRIMARY KEY (delivery_date, delivery_address)
 );
 
 /*
@@ -191,11 +189,9 @@ create Table Registered_Clients_Informations(
     peronal_data VARCHAR(255) NOT NULL,
     loyal_discount VARCHAR(255),
     credit_card CHAR(16) NOT NULL,
-    rci_address_street_name VARCHAR(255) NOT NULL, -- rci <===> registered client information
-    rci_address_city_country VARCHAR(255) NOT NULL,
+    rci_address VARCHAR(255) NOT NULL, -- rci <===> registered client information
     CONSTRAINT PK_rci PRIMARY KEY (username),
-    CONSTRAINT FK_rci_credit_card FOREIGN KEY (credit_card) REFERENCES Credit_Cards(card_number),
-    CONSTRAINT FK_rci_address FOREIGN KEY (rci_address_street_name, rci_address_city_country) REFERENCES Addresses(street_name, city_country )
+    CONSTRAINT FK_rci_credit_card FOREIGN KEY (credit_card) REFERENCES Credit_Cards(card_number)
     -- CONSTRAINT CK_loyal_discount CHECK (loyal_discount <= SYSDATE AND loyal_discount >= SYSDATE - 30)
 );
 

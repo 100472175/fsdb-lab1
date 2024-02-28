@@ -1,4 +1,4 @@
--- 1º Insert into products
+-- 1th Insert into products
 INSERT INTO PRODUCTS(name, species, variety, origin, roasting, decaffeinated)
     SELECT distinct
         product,
@@ -23,7 +23,7 @@ INSERT INTO PRODUCTS(name, species, variety, origin, roasting, decaffeinated)
         AND decaf IS NOT NULL;
 
 
--- 2º Insert into Formats
+-- 2th Insert into Formats
 INSERT INTO FORMATS(format_type_f, amount)
     SELECT distinct
         CASE 
@@ -39,7 +39,7 @@ INSERT INTO FORMATS(format_type_f, amount)
         where FORMAT is not null 
         and packaging is not null;
 
--- 3º Insert into Product References
+-- 3th Insert into Product References
 INSERT INTO Product_References (barcode, product, format_format_type, format_amount, price, stock, min_stock, max_stock)
 Select distinct
     barcode,
@@ -65,7 +65,7 @@ from fsdb.catalogue where barcode is not null
                     and MIN_STOCK is not null
                     and MAX_STOCK is not null;
 
--- 4º Insert into Providers
+-- 4th Insert into Providers
 INSERT INTO Providers (CIF, provider_name, sales_phone, sales_email, sales_name, provider_adress)
 Select distinct
     PROV_TAXID, 
@@ -84,7 +84,7 @@ from fsdb.catalogue where PROV_TAXID is not null
                     and PROV_MOBILE is not null;
 
 
--- 5º Insert into Product Providers
+-- 5th Insert into Product Providers
 INSERT INTO Providers_References (provider_cif, product_reference, price)
 Select distinct
     PROV_TAXID,
@@ -94,3 +94,24 @@ from fsdb.catalogue where PROV_TAXID is not null
                     and barcode is not null 
                     and retail_price is not null;
 
+
+-- 6th Insert Replacement Orders
+--to_char(to_date(regexp_replace(ORDERDATE, '[\s]', ''), 'YYYY/MM/DD'), 'DD/MM/YYYY') as order_date,
+-- We are leaving this insertion commented and unfiniched as the date is not inside the database, thus, there is information missing.
+-- In our model, we have the date as a primary key, so we cannot leave it empty.
+/*
+SELECT DISTINCT
+    to_date(regexp_replace(t.ORDERDATE, '[\s]', ''), 'YYYY/MM/DD') as order_date,
+    t.BARCODE,
+    c.PROV_TAXID,
+    t.QUANTITY,
+    to_date(regexp_replace(t.DLIV_DATE, '[\s]', ''), 'YYYY/MM/DD') as delivery_date,
+    t.QUANTITY * to_number(regexp_replace(regexp_replace(c.RETAIL_PRICE, '[^0-9.]', ''), '[.]', ',')) as total_price
+    CASE 
+        WHEN 
+FROM fsdb.trolley t
+JOIN fsdb.catalogue c ON t.barcode = c.barcode;
+
+*/
+
+-- select count(BILL_TOWN) from fsdb.trolley;
