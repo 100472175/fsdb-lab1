@@ -156,7 +156,11 @@ INSERT INTO Providers_References (provider_cif, product_reference, price)
 
 
 
-
-
-
+-- Deliveries
+-- Credit_Cards
+-- Registered_Clients_Informations
+-- Clients
+-- Purchases
+-- Opinions_References
+-- Opinions_Products
 
