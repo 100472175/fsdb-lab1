@@ -239,7 +239,7 @@ Create Table Purchases(
 Create Table Opinions_References(
     registered_client CHAR(30) NOT NULL,
     score NUMBER NOT NULL,
-    text_opinion VARCHAR(511) NOT NULL,
+    text_opinion VARCHAR(2000) NOT NULL,
     likes NUMBER DEFAULT 0 NOT NULL,
     endorsement NUMBER NOT NULL,
     product_reference CHAR(15) NOT NULL,
@@ -258,7 +258,7 @@ Create Table Opinions_References(
 Create Table Opinions_Products(
     registered_client CHAR(30) NOT NULL,
     score NUMBER NOT NULL,
-    text_opinion VARCHAR(511) NOT NULL,
+    text_opinion VARCHAR(2000) NOT NULL,
     likes NUMBER DEFAULT 0 NOT NULL,
     endorsement NUMBER NOT NULL,
     product CHAR(50) NOT NULL,
