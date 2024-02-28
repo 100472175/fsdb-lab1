@@ -23,11 +23,11 @@ And the primary key is the name of the product, which is unique.
 */
 
 CREATE TABLE Products(
-    name VARCHAR(255) NOT NULL,
-    species VARCHAR(255) NOT NULL,
-    variety VARCHAR(255) NOT NULL,
-    origin VARCHAR(255) NOT NULL,
-    roasting VARCHAR(255) NOT NULL,
+    name CHAR(50) NOT NULL,
+    species CHAR(20) NOT NULL,
+    variety CHAR(30) NOT NULL,
+    origin CHAR(15) NOT NULL,
+    roasting CHAR(10) NOT NULL,
     decaffeinated NUMBER(1) NOT NULL,
     CONSTRAINT PK_products_name PRIMARY KEY (name),
     CONSTRAINT CK_products_decaffeinated CHECK (decaffeinated IN (0, 1)),
@@ -41,8 +41,8 @@ And the primary key is the combination of the format_type and the amount, which 
 */
 
 CREATE TABLE Formats(
-    format_type_f varchar(255) not null,
-    amount varchar(255) not null,
+    format_type_f CHAR(20) not null,
+    amount CHAR(15) not null,
     CONSTRAINT PK_formats_amount PRIMARY KEY (format_type_f, amount),
     CONSTRAINT CK_formats_format_type CHECK (format_type_f IN ('raw grain', 'roasted beans', 'ground', 'freeze dried', 'capsules', 'prepared'))
 );
@@ -54,10 +54,10 @@ The barcode is the primary key, and the foreign keys are the product and the for
 */
 
 Create Table Product_References(
-    barcode VARCHAR(255) NOT NULL,
-    product VARCHAR(255) NOT NULL,
-    format_format_type VARCHAR(255) NOT NULL,
-    format_amount VARCHAR(255) NOT NULL,
+    barcode CHAR(15) NOT NULL,
+    product CHAR(50) NOT NULL,
+    format_format_type CHAR(20) NOT NULL,
+    format_amount CHAR(15) NOT NULL,
     price NUMBER NOT NULL,
     stock NUMBER DEFAULT 0 NOT NULL ,
     min_stock NUMBER DEFAULT 5 NOT NULL,
@@ -71,8 +71,31 @@ Create Table Product_References(
 
 
 /*
+The providers table has the CIF as the primary key.
+The only atribute we know the length of is the sales_phone, which is a char(9). 
+*/
+
+Create Table Providers(
+    CIF CHAR(10) NOT NULL,
+    provider_name CHAR(35) NOT NULL,
+    sales_name CHAR(90) NOT NULL,
+    sales_phone CHAR(9) NOT NULL,
+    sales_email CHAR(60) NOT NULL,
+    provider_adress CHAR(120) NOT NULL,    
+    CONSTRAINT PK_cif PRIMARY KEY (CIF),
+    CONSTRAINT CK_cif_letter CHECK (REGEXP_LIKE(CIF, '[A-Z][0-9]{8}')),
+    CONSTRAINT CK_sales_phone CHECK (REGEXP_LIKE(sales_phone, '^[0-9]+$'))
+    /*
+    We know that all the atributes are unique but we are not going to mark them all as unique,
+     as this would detriment considerably the performance of the database.
+    */
+);
+
+
+/*
 The only important aspect of the Adresses table is that the adress_id is unique.
 Here is where I have some doubt of how can we do this.
+TODO IMPORTANTE
 */
 
 Create Table Addresses(
@@ -91,37 +114,15 @@ Create Table Addresses(
 
 
 /*
-The providers table has the CIF as the primary key.
-The only atribute we know the length of is the sales_phone, which is a char(9). 
-*/
-
-Create Table Providers(
-    CIF CHAR(9) NOT NULL,
-    provider_name VARCHAR(255) NOT NULL,
-    sales_name VARCHAR(255) NOT NULL,
-    sales_phone VARCHAR(20) NOT NULL,
-    sales_email VARCHAR(255) NOT NULL,
-    provider_adress VARCHAR(255) NOT NULL,    
-    CONSTRAINT PK_cif PRIMARY KEY (CIF),
-    CONSTRAINT CK_cif_letter CHECK (CIF LIKE '[A-Z][0-9]{8}'),
-    CONSTRAINT CK_sales_phone CHECK (sales_phone LIKE '(00|\+)[0-9]+')
-    /*
-    We know that all the atributes are unique but we are not going to mark them all as unique,
-     as this would detriment considerably the performance of the database.
-    */
-);
-
-
-/*
 The replacement orders has the primary key as the reference, which is a foreign key to the Product_References table.
 The provider can be Null, as well as the receiving_date and the payment.
 */
 
 CREATE TABLE Replacement_Orders(
     order_date DATE NOT NULL,
-    reference VARCHAR(255) NOT NULL,
+    reference CHAR(15) NOT NULL,
     order_status VARCHAR(255) NOT NULL,
-    provider_cif CHAR(9),
+    provider_cif CHAR(10),
     amount_units NUMBER NOT NULL,
     receiving_date DATE,
     payment VARCHAR(255),
@@ -136,8 +137,8 @@ CREATE TABLE Replacement_Orders(
 */
 
 Create Table Providers_References(
-    provider_cif char(9) not null,
-    product_reference VARCHAR(255) NOT NULL,
+    provider_cif char(10) not null,
+    product_reference CHAR(15) NOT NULL,
     price NUMBER NOT NULL,
     CONSTRAINT PK_providers_reference_provider_prod_reference PRIMARY KEY (provider_cif, product_reference),
     CONSTRAINT FK_providers_reference_provider FOREIGN KEY (provider_cif) REFERENCES Providers(CIF),
@@ -223,7 +224,7 @@ Create Table Purchases(
     delivery_date DATE NOT NULL,
     purchases_address_street_name VARCHAR(255) NOT NULL,
     purchases_address_city_country VARCHAR(255) NOT NULL,
-    product_reference VARCHAR(255) NOT NULL,
+    product_reference CHAR(15) NOT NULL,
     amount NUMBER NOT NULL,
     payment_date DATE,
     payment_type VARCHAR(255) NOT NULL,
@@ -246,7 +247,7 @@ Create Table Opinions_References(
     text_opinion VARCHAR(511) NOT NULL,
     likes NUMBER DEFAULT 0 NOT NULL,
     endorsement NUMBER NOT NULL,
-    product_reference VARCHAR(255) NOT NULL,
+    product_reference CHAR(15) NOT NULL,
     CONSTRAINT PK_Opinions_references PRIMARY KEY (registered_client, product_reference),
     CONSTRAINT FK_Opinions_references_registered_client FOREIGN KEY (registered_client) REFERENCES Registered_Clients_Informations(username),
     CONSTRAINT FK_Opinions_references_product_reference FOREIGN KEY (product_reference) REFERENCES Product_References(barcode),
@@ -265,7 +266,7 @@ Create Table Opinions_Products(
     text_opinion VARCHAR(511) NOT NULL,
     likes NUMBER DEFAULT 0 NOT NULL,
     endorsement NUMBER NOT NULL,
-    product VARCHAR(255) NOT NULL,
+    product CHAR(50) NOT NULL,
     CONSTRAINT PK_Opinions_product PRIMARY KEY (registered_client, product),
     CONSTRAINT FK_Opinions_product_registered_client FOREIGN KEY (registered_client) REFERENCES Registered_Clients_Informations(username),
     CONSTRAINT FK_Opinions_product_product FOREIGN KEY (product) REFERENCES Products(name),

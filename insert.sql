@@ -65,4 +65,21 @@ from fsdb.catalogue where barcode is not null
                     and MIN_STOCK is not null
                     and MAX_STOCK is not null;
 
+-- 4º Insert into Providers
+INSERT INTO Providers (CIF, provider_name, sales_phone, sales_email, sales_name, provider_adress)
+Select distinct
+    PROV_TAXID, 
+    SUPPLIER,
+    PROV_MOBILE,
+    PROV_EMAIL,
+    --PROV_BANKACC,
+    PROV_PERSON,
+    PROV_ADDRESS
+from fsdb.catalogue where PROV_TAXID is not null 
+                    and SUPPLIER is not null 
+                    and PROV_MOBILE is not null 
+                    and PROV_EMAIL is not null 
+                    and PROV_BANKACC is not null 
+                    and PROV_PERSON is not null 
+                    and PROV_MOBILE is not null;
 
