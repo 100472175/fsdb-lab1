@@ -1,3 +1,19 @@
+drop table Opinions_Products;
+drop table Opinions_References;
+drop table Purchases; 
+drop table Clients;
+drop table Registered_Clients_Informations;
+drop table Credit_Cards;
+drop table Deliveries;
+drop table Providers_References;
+drop table Replacement_Orders;
+drop table Providers;
+drop table Addresses;
+drop table Product_References;
+drop table Formats;
+drop table Products;
+
+
 -- TODO: Naming all constraints
 
 /*
@@ -49,8 +65,8 @@ Create Table Product_References(
     CONSTRAINT PK_product_reference_barcode PRIMARY KEY (barcode),
     CONSTRAINT FK_product_reference_product FOREIGN KEY (product) REFERENCES Products(name),
     CONSTRAINT FK_product_reference_format_type FOREIGN KEY (format_format_type, format_amount) REFERENCES Formats(format_type_f, amount),
-    CONSTRAINT CK_product_reference_stock_min_stock CHECK (stock >= 0),
-    CONSTRAINT CK_product_reference_stock_max_stock CHECK (stock <= max_stock)
+    CONSTRAINT CK_product_reference_stock_min_stock CHECK (stock >= 0)
+    --CONSTRAINT CK_product_reference_stock_max_stock CHECK (stock <= max_stock)
 );
 
 
@@ -207,7 +223,7 @@ Create Table Purchases(
     delivery_date DATE NOT NULL,
     purchases_address_street_name VARCHAR(255) NOT NULL,
     purchases_address_city_country VARCHAR(255) NOT NULL,
-    product_reference NUMBER NOT NULL,
+    product_reference VARCHAR(255) NOT NULL,
     amount NUMBER NOT NULL,
     payment_date DATE,
     payment_type VARCHAR(255) NOT NULL,
@@ -230,7 +246,7 @@ Create Table Opinions_References(
     text_opinion VARCHAR(511) NOT NULL,
     likes NUMBER DEFAULT 0 NOT NULL,
     endorsement NUMBER NOT NULL,
-    product_reference NUMBER NOT NULL,
+    product_reference VARCHAR(255) NOT NULL,
     CONSTRAINT PK_Opinions_references PRIMARY KEY (registered_client, product_reference),
     CONSTRAINT FK_Opinions_references_registered_client FOREIGN KEY (registered_client) REFERENCES Registered_Clients_Informations(username),
     CONSTRAINT FK_Opinions_references_product_reference FOREIGN KEY (product_reference) REFERENCES Product_References(barcode),

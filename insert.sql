@@ -1,5 +1,5 @@
 -- 1º Insert into products
-INSERT INTO PRODUCTS(
+INSERT INTO PRODUCTS(name, species, variety, origin, roasting, decaffeinated)
     SELECT distinct
         product,
         coffea,
@@ -11,44 +11,58 @@ INSERT INTO PRODUCTS(
             ELSE 'high-roast'
         END,
         CASE 
-            WHEN dcafprocess IS NOT NULL AND dcafprocess != '' THEN 1 
+            WHEN decaf IS NOT NULL AND decaf LIKE 'yes' THEN 1 
             ELSE 0 
         END
-    FROM fsdb.trolley);
+    FROM fsdb.catalogue
+    WHERE product IS NOT NULL 
+        AND coffea IS NOT NULL 
+        AND varietal IS NOT NULL 
+        AND origin IS NOT NULL 
+        AND roasting IS NOT NULL 
+        AND decaf IS NOT NULL;
 
 
 -- 2º Insert into Formats
-INSERT INTO FORMATS(
+INSERT INTO FORMATS(format_type_f, amount)
     SELECT distinct
         CASE 
-            WHEN PRODTYPE is not null and PRODTYPE like 'raw%' THEN 'raw grain'
-            WHEN PRODTYPE is not null and PRODTYPE like 'roasted%' THEN 'roasted beans'
-            WHEN PRODTYPE is not null and PRODTYPE like 'ground%' THEN 'ground'
-            WHEN PRODTYPE is not null and PRODTYPE like 'freeze%' THEN 'freeze dried'
-            WHEN PRODTYPE is not null and PRODTYPE like 'capsules%' THEN 'capsules'
-            WHEN PRODTYPE is not null and PRODTYPE like 'prepared%' THEN 'prepared'
+            WHEN FORMAT is not null and FORMAT like 'raw%' THEN 'raw grain'
+            WHEN FORMAT is not null and FORMAT like 'roasted%' THEN 'roasted beans'
+            WHEN FORMAT is not null and FORMAT like 'ground%' THEN 'ground'
+            WHEN FORMAT is not null and FORMAT like 'freeze%' THEN 'freeze dried'
+            WHEN FORMAT is not null and FORMAT like 'capsules%' THEN 'capsules'
+            WHEN FORMAT is not null and FORMAT like 'prepared%' THEN 'prepared'
         END as format,
         packaging 
-    from fsdb.trolley);
+    from fsdb.catalogue 
+        where FORMAT is not null 
+        and packaging is not null;
 
 -- 3º Insert into Product References
-
+INSERT INTO Product_References (barcode, product, format_format_type, format_amount, price, stock, min_stock, max_stock)
 Select distinct
     barcode,
     product,
     CASE 
-        WHEN PRODTYPE is not null and PRODTYPE like 'raw%' THEN 'raw grain'
-        WHEN PRODTYPE is not null and PRODTYPE like 'roasted%' THEN 'roasted beans'
-        WHEN PRODTYPE is not null and PRODTYPE like 'ground%' THEN 'ground'
-        WHEN PRODTYPE is not null and PRODTYPE like 'freeze%' THEN 'freeze dried'
-        WHEN PRODTYPE is not null and PRODTYPE like 'capsules%' THEN 'capsules'
-        WHEN PRODTYPE is not null and PRODTYPE like 'prepared%' THEN 'prepared'
+        WHEN FORMAT is not null and FORMAT like 'raw%' THEN 'raw grain'
+        WHEN FORMAT is not null and FORMAT like 'roasted%' THEN 'roasted beans'
+        WHEN FORMAT is not null and FORMAT like 'ground%' THEN 'ground'
+        WHEN FORMAT is not null and FORMAT like 'freeze%' THEN 'freeze dried'
+        WHEN FORMAT is not null and FORMAT like 'capsules%' THEN 'capsules'
+        WHEN FORMAT is not null and FORMAT like 'prepared%' THEN 'prepared'
     END as format,
     packaging,
-    base_price,
-    QUANTITY
-from fsdb.trolley where barcode is not null 
+    to_number(regexp_replace(regexp_replace(retail_price, '[^0-9.]', ''), '[.]', ',')) as base_price,
+    to_number(CUR_STOCK) as cur_stock,
+    to_number(MIN_STOCK) as MIN_STOCK,
+    to_number(MAX_STOCK) as MAX_STOCK
+from fsdb.catalogue where barcode is not null 
                     and product is not null 
                     and packaging is not null 
-                    and base_price is not null 
-                    and QUANTITY is not null;
+                    and retail_price is not null 
+                    and cur_stock is not null
+                    and MIN_STOCK is not null
+                    and MAX_STOCK is not null;
+
+
