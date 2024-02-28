@@ -149,15 +149,51 @@ INSERT INTO Providers_References (provider_cif, product_reference, price)
     Select distinct
         PROV_TAXID,
         barcode,
-        to_number(regexp_replace(regexp_replace(retail_price, '[^0-9.]', ''), '[.]', ',')) as price
+        to_number(regexp_replace(regexp_replace(cost_price, '[^0-9.]', ''), '[.]', ',')) as price
     from fsdb.catalogue where PROV_TAXID is not null 
                         and barcode is not null 
-                        and retail_price is not null;
+                        and cost_price is not null;
 
 
 
 -- Deliveries
--- Found it was redundant information as it is already in the Purchases Table, so we are not going to insert it.
+INSERT INTO Deliveries (delivery_date, delivery_address)
+SELECT DISTINCT
+    TO_DATE(dliv_date, 'YYYY/MM/DD') AS delivery_date,
+    TRIM(',' FROM
+        CONCAT(
+            CONCAT(
+                CONCAT(
+                    CONCAT(
+                        CONCAT(
+                            CONCAT(
+                                CONCAT(
+                                    CONCAT(
+                                        CONCAT(
+                                            CONCAT(
+                                                CONCAT(
+                                                    CASE WHEN TRIM(dliv_waytype) IS NOT NULL THEN TRIM(dliv_waytype) ELSE '' END,
+                                                    CASE WHEN TRIM(dliv_wayname) IS NOT NULL THEN TRIM(dliv_wayname) || ', ' ELSE '' END
+                                                ),
+                                                CASE WHEN TRIM(dliv_gate) IS NOT NULL THEN TRIM(dliv_gate) || ', ' ELSE '' END
+                                            ),
+                                            CASE WHEN TRIM(dliv_block) IS NOT NULL THEN TRIM(dliv_block) || ', ' ELSE '' END
+                                        ),
+                                        CASE WHEN TRIM(dliv_stairw) IS NOT NULL THEN TRIM(dliv_stairw) || ', ' ELSE '' END
+                                    ),
+                                    CASE WHEN TRIM(dliv_floor) IS NOT NULL THEN TRIM(dliv_floor) || ', ' ELSE '' END
+                                ),
+                                CASE WHEN TRIM(dliv_door) IS NOT NULL THEN TRIM(dliv_door) || ', ' ELSE '' END
+                            ),
+                            CASE WHEN TRIM(dliv_zip) IS NOT NULL THEN TRIM(dliv_zip) || ', ' ELSE '' END
+                        ),
+                        CASE WHEN TRIM(dliv_town) IS NOT NULL THEN TRIM(dliv_town) || ', ' ELSE '' END
+                    ),
+                    CASE WHEN TRIM(dliv_country) IS NOT NULL THEN TRIM(dliv_country) ELSE '' END
+                ), ''), '')
+    ) AS delivery_address
+FROM fsdb.trolley
+WHERE dliv_date IS NOT NULL;
 
 
 
