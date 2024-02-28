@@ -2,8 +2,8 @@ drop table Opinions_Products;
 drop table Opinions_References;
 drop table Purchases; 
 drop table Clients;
-drop table Registered_Clients_Informations;
 drop table Credit_Cards;
+drop table Registered_Clients_Informations;
 drop table Deliveries;
 drop table Providers_References;
 drop table Replacement_Orders;
@@ -158,24 +158,6 @@ CREATE TABLE Deliveries(
     CONSTRAINT PK_Deliveries PRIMARY KEY (delivery_date, delivery_address)
 );
 
-/*
--- After looking the statement again, it seems the voucher already has a date, so we don't need this table
-Create Table Discounts(
-    voucher VARCHAR(255) NOT NULL,
-    date_voucher DATE NOT NULL,
-    PRIMARY KEY (voucher, date_voucher)
-);
-*/
-
-Create Table Credit_Cards(
-    card_number CHAR(16) NOT NULL,
-    expiration_date DATE NOT NULL,
-    holder VARCHAR(255) NOT NULL,
-    finance_company VARCHAR(255) NOT NULL,
-    CONSTRAINT PK_Credit_card PRIMARY KEY (card_number),
-    CONSTRAINT CK_card_number CHECK (REGEXP_LIKE(card_number, '[0-9]{16}'))
-);
-
 
 /*
 Here, what we discus with the professor was applied. We cerated a contact_media and a contact_media_alternative.
@@ -188,12 +170,30 @@ create Table Registered_Clients_Informations(
     registration_date DATE NOT NULL,
     peronal_data VARCHAR(255) NOT NULL,
     loyal_discount VARCHAR(255),
-    credit_card CHAR(16) NOT NULL,
-    rci_address VARCHAR(255) NOT NULL, -- rci <===> registered client information
-    CONSTRAINT PK_rci PRIMARY KEY (username),
-    CONSTRAINT FK_rci_credit_card FOREIGN KEY (credit_card) REFERENCES Credit_Cards(card_number)
+    CONSTRAINT PK_rci PRIMARY KEY (username)
     -- CONSTRAINT CK_loyal_discount CHECK (loyal_discount <= SYSDATE AND loyal_discount >= SYSDATE - 30)
 );
+
+
+
+/*
+-- After looking the statement again, it seems the voucher already has a date, so we don't need this table
+Create Table Discounts(
+    voucher VARCHAR(255) NOT NULL,
+    date_voucher DATE NOT NULL,
+    PRIMARY KEY (voucher, date_voucher)
+);
+*/
+
+Create Table Credit_Cards(
+    card_number CHAR(20) NOT NULL,
+    username CHAR(30) NOT NULL,
+    expiration_date DATE NOT NULL,
+    holder VARCHAR(255) NOT NULL,
+    finance_company VARCHAR(255) NOT NULL,
+    CONSTRAINT PK_Credit_card PRIMARY KEY (card_number),
+    CONSTRAINT FK_username FOREIGN KEY (username) REFERENCES Registered_Clients_Informations(username)
+    );
 
 
 /* 
@@ -218,7 +218,7 @@ Create Table Clients(
 Create Table Purchases(
     costumer VARCHAR(255) NOT NULL,
     delivery_date DATE NOT NULL,
-    purchases_address VARCHAR(255) NOT NULL,
+    purchases_address CHAR(120) NOT NULL,
     product_reference CHAR(15) NOT NULL,
     amount NUMBER NOT NULL,
     payment_date DATE,
