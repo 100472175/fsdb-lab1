@@ -97,18 +97,17 @@ The only important aspect of the Adresses table is that the adress_id is unique.
 Here is where I have some doubt of how can we do this.
 This will store the billing addresses while the delivery addresses will be stored in the Purchases Table.
 */
-
 Create Table Addresses(
-    username VARCHAR(255) NOT NULL,
-    street_type VARCHAR(255) NOT NULL,
-    street_name VARCHAR(255) NOT NULL,
+    username CHAR(30) NOT NULL,
+    street_type CHAR(10) NOT NULL,
+    street_name CHAR(30) NOT NULL,
     gateway_num NUMBER,
     block_num NUMBER,
     stairs_id CHAR(5),
     floor NUMBER,
     door CHAR(1),
     ZIP_code CHAR(5) NOT NULL,
-    city_country VARCHAR(255) NOT NULL,
+    city_country CHAR(70) NOT NULL,
     CONSTRAINT PK_addresses PRIMARY KEY (username, city_country),
     CONSTRAINT CK_address_ZIP_code CHECK (REGEXP_LIKE(ZIP_code, '[0-9]{5}'))
 );
@@ -184,7 +183,7 @@ The main is the one that will be always populated, and if the alternative is pop
 */
 
 create Table Registered_Clients_Informations(
-    username VARCHAR(255) NOT NULL,
+    username CHAR(30) NOT NULL,
     client_password VARCHAR(255) NOT NULL,
     registration_date DATE NOT NULL,
     peronal_data VARCHAR(255) NOT NULL,
@@ -206,7 +205,7 @@ And the main information of the client is in the Registered_Clients_Informations
 Create Table Clients(
     main_contact VARCHAR(255) NOT NULL,
     alt_contact VARCHAR(255),
-    registered_client_information VARCHAR(255),
+    registered_client_information CHAR(30),
     CONSTRAINT PK_main_contact PRIMARY KEY (main_contact),
     CONSTRAINT FK_registered_client_information FOREIGN KEY (registered_client_information) REFERENCES Registered_Clients_Informations(username)
 );
@@ -238,7 +237,7 @@ Create Table Purchases(
 */
 
 Create Table Opinions_References(
-    registered_client VARCHAR(255) NOT NULL,
+    registered_client CHAR(30) NOT NULL,
     score NUMBER NOT NULL,
     text_opinion VARCHAR(511) NOT NULL,
     likes NUMBER DEFAULT 0 NOT NULL,
@@ -257,7 +256,7 @@ Create Table Opinions_References(
 */
 
 Create Table Opinions_Products(
-    registered_client VARCHAR(255) NOT NULL,
+    registered_client CHAR(30) NOT NULL,
     score NUMBER NOT NULL,
     text_opinion VARCHAR(511) NOT NULL,
     likes NUMBER DEFAULT 0 NOT NULL,

@@ -157,6 +157,10 @@ INSERT INTO Providers_References (provider_cif, product_reference, price)
 
 
 -- Deliveries
+-- Found it was redundant information as it is already in the Purchases Table, so we are not going to insert it.
+
+
+
 -- Credit_Cards
 -- Registered_Clients_Informations
 -- Clients
