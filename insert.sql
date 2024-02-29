@@ -250,23 +250,49 @@ from fsdb.trolley where card_number is not null AND (length(card_number) > 0)
 
 
 -- Clients
-insert into Clients (
-	select a.CLIENT_EMAIL main_contact,a.CLIENT_MOBILE alt_contact, a.USERNAME registered_client_information
+insert into Clients (main_contact, alt_contact, registered_client_information)
+	select
+    NVL(a.CLIENT_EMAIL, a.CLIENT_MOBILE) as main_contact,
+    CASE 
+        WHEN a.CLIENT_EMAIL IS NOT NULL THEN a.CLIENT_MOBILE
+        ELSE NULL
+    END as alt_contact,
+    a.USERNAME registered_client_information
 	from fsdb.trolley a
-	group by a.CLIENT_EMAIL ,a.CLIENT_MOBILE , a.USERNAME );
+	group by a.CLIENT_EMAIL ,a.CLIENT_MOBILE , a.USERNAME;
 
 
 -- Purchases
+
+
 -- Opinions_References
 INSERT INTO Opinions_References(registered_client, product_reference, score, text_opinion, likes, endorsement, references_date)
-    select A.USERNAME, A.BARCODE, A.SCORE, A.TEXT, A.LIKES, NVL(A.ENDORSED, 0), to_date(a.POST_DATE||' '||a.POST_TIME,'yyyy/mm/dd hh:mi:ss pm')
-    from fsdb.posts A, Registered_Clients_Informations B, Product_References C
+    select 
+    A.USERNAME,
+    A.BARCODE,
+    A.SCORE,
+    A.TEXT,
+    A.LIKES,
+    NVL(A.ENDORSED, 0), 
+    to_date(a.POST_DATE||' '||a.POST_TIME,'yyyy/mm/dd hh:mi:ss pm')
+    from fsdb.posts A,
+        Registered_Clients_Informations B,
+        Product_References C
     where A.USERNAME = B.username and A.BARCODE = C.barcode;
 
 -- Opinions_Products
 INSERT INTO Opinions_Products(registered_client, product, score, text_opinion, likes, endorsement, products_date)
-    select A.USERNAME, A.PRODUCT, A.SCORE, A.TEXT, A.LIKES, NVL(A.ENDORSED, 0), to_date(a.POST_DATE||' '||a.POST_TIME,'yyyy/mm/dd hh:mi:ss pm')
-    from fsdb.posts A, Registered_Clients_Informations B, Products C
+    select 
+    A.USERNAME,
+    A.PRODUCT,
+    A.SCORE,
+    A.TEXT,
+    A.LIKES,
+    NVL(A.ENDORSED, 0),
+    to_date(a.POST_DATE||' '||a.POST_TIME,'yyyy/mm/dd hh:mi:ss pm')
+    from fsdb.posts A, 
+        Registered_Clients_Informations B, 
+        Products C
     where A.USERNAME = B.username and A.product = C.name;
 
 

@@ -203,10 +203,10 @@ And the main information of the client is in the Registered_Clients_Informations
 */
 
 Create Table Clients(
-    main_contact VARCHAR(255) NULL,
-    alt_contact VARCHAR(255) NULL,
-    registered_client_information CHAR(30) NULL,
-    CONSTRAINT UK_main_contact UNIQUE  (main_contact,alt_contact),
+    main_contact VARCHAR(60) NOT NULL,
+    alt_contact VARCHAR(9),
+    registered_client_information CHAR(30),
+    CONSTRAINT PK_main_contact PRIMARY KEY (main_contact),
     CONSTRAINT FK_registered_client_information FOREIGN KEY (registered_client_information) REFERENCES Registered_Clients_Informations(username) 
 );
 
@@ -216,8 +216,8 @@ Create Table Clients(
 */
 
 Create Table Purchases(
-    customer VARCHAR(255) NULL,
-	mobile  VARCHAR(255)  NULL,
+    customer VARCHAR(255) NOT NULL,
+	mobile VARCHAR(255) NOT NULL,
     delivery_date DATE NOT NULL,
     purchases_address CHAR(120) NOT NULL,
     product_reference CHAR(15) NOT NULL,
@@ -226,8 +226,8 @@ Create Table Purchases(
     payment_type VARCHAR(255) NOT NULL,
     card_data CHAR(16),
     total_price NUMBER NOT NULL,
-    CONSTRAINT UK_purchases UNIQUE (customer, mobile, delivery_date, purchases_address, product_reference),
-    CONSTRAINT FK_purchases_customer FOREIGN KEY (customer,mobile) REFERENCES Clients(main_contact,alt_contact),
+    CONSTRAINT PK_purchases PRIMARY KEY (customer, mobile, delivery_date, purchases_address, product_reference),
+    CONSTRAINT FK_purchases_customer FOREIGN KEY (customer) REFERENCES Clients(main_contact),
     CONSTRAINT FK_purchases_divery_adress FOREIGN KEY (delivery_date, purchases_address) REFERENCES Deliveries(delivery_date, delivery_address),
     CONSTRAINT FK_purchases_product_reference FOREIGN KEY (product_reference) REFERENCES Product_References(barcode)
 );
