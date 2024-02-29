@@ -154,7 +154,7 @@ The deliveries table is a combination of the delivery_date and the delivery_addr
 
 CREATE TABLE Deliveries(
     delivery_date DATE NOT NULL,
-    delivery_address CHAR(120) NOT NULL,
+    delivery_address VARCHAR2(120) NOT NULL,
     CONSTRAINT PK_Deliveries PRIMARY KEY (delivery_date, delivery_address)
 );
 
@@ -219,7 +219,7 @@ Create Table Purchases(
     customer VARCHAR(255) NOT NULL,
 	mobile VARCHAR(255) NOT NULL,
     delivery_date DATE NOT NULL,
-    purchases_address CHAR(120) NOT NULL,
+    purchases_address VARCHAR2(120) NOT NULL,
     product_reference CHAR(15) NOT NULL,
     amount NUMBER NOT NULL,
     payment_date DATE,
