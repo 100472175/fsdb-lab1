@@ -250,6 +250,12 @@ from fsdb.trolley where card_number is not null AND (length(card_number) > 0)
 
 
 -- Clients
+insert into Clients (
+	select a.CLIENT_EMAIL main_contact,a.CLIENT_MOBILE alt_contact, a.USERNAME registered_client_information
+	from fsdb.trolley a
+	group by a.CLIENT_EMAIL ,a.CLIENT_MOBILE , a.USERNAME );
+
+
 -- Purchases
 -- Opinions_References
 INSERT INTO Opinions_References(registered_client, product_reference, score, text_opinion, likes, endorsement, references_date)
