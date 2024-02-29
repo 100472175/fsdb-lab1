@@ -252,14 +252,14 @@ from fsdb.trolley where card_number is not null AND (length(card_number) > 0)
 -- Clients
 -- Purchases
 -- Opinions_References
-INSERT INTO Opinions_References(registered_client,product_reference, score, text_opinion, likes, endorsement)
-    select A.USERNAME, A.BARCODE, A.SCORE, A.TEXT, A.LIKES, A.ENDORSED
+INSERT INTO Opinions_References(registered_client, product_reference, score, text_opinion, likes, endorsement, references_date)
+    select A.USERNAME, A.BARCODE, A.SCORE, A.TEXT, A.LIKES, NVL(A.ENDORSED, 0), to_date(a.POST_DATE||' '||a.POST_TIME,'yyyy/mm/dd hh:mi:ss pm')
     from fsdb.posts A, Registered_Clients_Informations B, Product_References C
     where A.USERNAME = B.username and A.BARCODE = C.barcode;
 
 -- Opinions_Products
-INSERT INTO Opinions_Products(registered_client,product, score, text_opinion, likes, endorsement)
-    select A.USERNAME, A.PRODUCT, A.SCORE, A.TEXT, A.LIKES, A.ENDORSED
+INSERT INTO Opinions_Products(registered_client, product, score, text_opinion, likes, endorsement, products_date)
+    select A.USERNAME, A.PRODUCT, A.SCORE, A.TEXT, A.LIKES, NVL(A.ENDORSED, 0), to_date(a.POST_DATE||' '||a.POST_TIME,'yyyy/mm/dd hh:mi:ss pm')
     from fsdb.posts A, Registered_Clients_Informations B, Products C
     where A.USERNAME = B.username and A.product = C.name;
 

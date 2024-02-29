@@ -237,13 +237,14 @@ Create Table Purchases(
 */
 
 Create Table Opinions_References(
-    registered_client CHAR(30) NOT NULL,
+    registered_client VARCHAR(255) NOT NULL,
     score NUMBER NOT NULL,
-    text_opinion VARCHAR(2000) NOT NULL,
+    text_opinion VARCHAR(511) NOT NULL,
     likes NUMBER DEFAULT 0 NOT NULL,
-    endorsement NUMBER NULL,
+    endorsement NUMBER NOT NULL,
     product_reference CHAR(15) NOT NULL,
-    CONSTRAINT PK_Opinions_references PRIMARY KEY (registered_client, product_reference),
+    references_date DATE NOT NULL;
+    CONSTRAINT PK_Opinions_references PRIMARY KEY (registered_client, product_reference, references_date),
     CONSTRAINT FK_Opinions_references_registered_client FOREIGN KEY (registered_client) REFERENCES Registered_Clients_Informations(username),
     CONSTRAINT FK_Opinions_references_product_reference FOREIGN KEY (product_reference) REFERENCES Product_References(barcode),
     CONSTRAINT CK_opinions_references_score CHECK (score >= 0 AND score <= 5),
@@ -256,17 +257,16 @@ Create Table Opinions_References(
 */
 
 Create Table Opinions_Products(
-    registered_client CHAR(30) NOT NULL,
+    registered_client VARCHAR(255) NOT NULL,
     score NUMBER NOT NULL,
-    text_opinion VARCHAR(2000) NOT NULL,
+    text_opinion VARCHAR(511) NOT NULL,
     likes NUMBER DEFAULT 0 NOT NULL,
-    endorsement NUMBER NULL,
+    endorsement NUMBER NOT NULL,
     product CHAR(50) NOT NULL,
-    CONSTRAINT PK_Opinions_product PRIMARY KEY (registered_client, product),
+    products_date DATE NOT NULL;
+    CONSTRAINT PK_Opinions_product PRIMARY KEY (registered_client, product,products_date),
     CONSTRAINT FK_Opinions_product_registered_client FOREIGN KEY (registered_client) REFERENCES Registered_Clients_Informations(username),
     CONSTRAINT FK_Opinions_product_product FOREIGN KEY (product) REFERENCES Products(name),
     CONSTRAINT CK_opinions_products_score CHECK (score >= 0 AND score <= 5),
     CONSTRAINT CK_opinions_products_likes_max CHECK (likes <= 1000000000)
 );
-
-
