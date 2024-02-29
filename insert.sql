@@ -169,7 +169,7 @@ INSERT INTO Providers_References(provider_cif, product_reference, price)
 INSERT INTO Deliveries (delivery_date, delivery_address)
 SELECT DISTINCT
     TO_DATE(dliv_date, 'YYYY/MM/DD') AS delivery_date,
-    TRIM(',' FROM
+    LTRIM(RTRIM( TRIM(',' FROM
         CONCAT(
             CONCAT(
                 CONCAT(
@@ -199,7 +199,7 @@ SELECT DISTINCT
                         CASE WHEN TRIM(dliv_town) IS NOT NULL THEN TRIM(dliv_town) || ', ' ELSE '' END
                     ),
                     CASE WHEN TRIM(dliv_country) IS NOT NULL THEN TRIM(dliv_country) ELSE '' END
-                ), ''), '')
+                ), ''), '')))
     ) AS delivery_address
 FROM fsdb.trolley
 WHERE dliv_date IS NOT NULL;
