@@ -224,7 +224,7 @@ Create Table Purchases(
     amount NUMBER NOT NULL,
     payment_date DATE,
     payment_type VARCHAR(255) NOT NULL,
-    card_data CHAR(16),
+    card_data CHAR(20),
     total_price NUMBER NOT NULL,
     CONSTRAINT PK_purchases PRIMARY KEY (customer, mobile, delivery_date, purchases_address, product_reference),
     CONSTRAINT FK_purchases_customer FOREIGN KEY (customer) REFERENCES Clients(main_contact),
