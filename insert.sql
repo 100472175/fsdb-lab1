@@ -263,7 +263,25 @@ insert into Clients (main_contact, alt_contact, registered_client_information)
 
 
 -- Purchases
-
+insert into Purchases(
+	select distinct
+		NVL(a.CLIENT_EMAIL, a.CLIENT_MOBILE) as customer,
+	CASE 
+		WHEN a.CLIENT_EMAIL IS NOT NULL THEN NVL(a.CLIENT_MOBILE,'#') 
+		ELSE '#' 
+			END as mobile,
+	to_date(a.DLIV_DATE,'yyyy/mm/dd') delivery_date,
+	RTRIM(LTRIM(DLIV_WAYTYPE))||RTRIM(LTRIM(DLIV_WAYNAME))||NVL2(DLIV_GATE,', '||RTRIM(LTRIM(DLIV_GATE)),'')||NVL2(DLIV_BLOCK,', '||RTRIM(LTRIM(DLIV_BLOCK)),'')||NVL2(DLIV_STAIRW, ', '||RTRIM(LTRIM(DLIV_STAIRW)),'')||NVL2(DLIV_FLOOR,', '||RTRIM(LTRIM(DLIV_FLOOR)),'')||NVL2(DLIV_ZIP,  ', '||RTRIM(LTRIM(DLIV_ZIP)),'')||NVL2(DLIV_TOWN,  ', '||RTRIM(LTRIM(DLIV_TOWN)),'')||NVL2(DLIV_COUNTRY,  ', '||RTRIM(LTRIM(DLIV_COUNTRY)),'') purchases_address,
+	a.barcode product_reference,
+	a.QUANTITY amount,
+	to_date(a.PAYMENT_DATE||' '||a.PAYMENT_TIME,'yyyy/mm/dd hh:mi:ss pm') payment_date,
+	a.PAYMENT_TYPE payment_type,
+	a.CARD_NUMBER card_data,
+	to_number(replace(TRIM(REGEXP_REPLACE (a.BASE_PRICE, '[[:alpha:]]','')),'.',','))*to_number(QUANTITY) total_price
+	from fsdb.trolley A, Deliveries b
+	where b.delivery_date = to_date(a.DLIV_DATE,'yyyy-mm-dd')
+	and b.delivery_address = RTRIM(LTRIM(DLIV_WAYTYPE))||RTRIM(LTRIM(DLIV_WAYNAME))||NVL2(DLIV_GATE,', '||RTRIM(LTRIM(DLIV_GATE)),'')||NVL2(DLIV_BLOCK,', '||RTRIM(LTRIM(DLIV_BLOCK)),'')||NVL2(DLIV_STAIRW,', '||RTRIM(LTRIM(DLIV_STAIRW)),'')||NVL2(DLIV_FLOOR,', '||RTRIM(LTRIM(DLIV_FLOOR)),'')||NVL2(DLIV_ZIP,', '||RTRIM(LTRIM(DLIV_ZIP)),'')||NVL2(DLIV_TOWN,', '||RTRIM(LTRIM(DLIV_TOWN)),'')||NVL2(DLIV_COUNTRY,', '||RTRIM(LTRIM(DLIV_COUNTRY)),'')
+);
 
 -- Opinions_References
 INSERT INTO Opinions_References(registered_client, product_reference, score, text_opinion, likes, endorsement, references_date)
