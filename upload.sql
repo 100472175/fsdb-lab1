@@ -243,14 +243,18 @@ INSERT INTO Registered_Clients_Informations (username, client_password, registra
             
 
 -- Credit_Cards
+/*
+ In the beginning, we had the length of the card number as 16, but we found out that there are
+ some cards with 10, 11 or 12 digits, after the whitespaces are removed.
+ */
 INSERT INTO Credit_Cards (card_number, expiration_date, holder, finance_company, username)
 Select distinct
-    card_number,
+    TRIM(card_number),
     to_date(card_expiratn, 'MM/YY') as card_expiration,
     card_holder,
     card_company,
     username
-from fsdb.trolley where card_number is not null AND (length(card_number) > 0)
+from fsdb.trolley where card_number is not null AND (length(TRIM(card_number)) > 0)
                     and card_expiratn is not null 
                     and card_holder is not null 
                     and card_company is not null
@@ -258,6 +262,9 @@ from fsdb.trolley where card_number is not null AND (length(card_number) > 0)
 
 
 -- Clients
+/*
+ As some clients may register with their email or phone number, we had to choose the first not null option (NVL)
+ */
 INSERT INTO Clients (main_contact, alt_contact, registered_client_information)
 	select
     NVL(CLIENT_EMAIL, CLIENT_MOBILE) as main_contact,
@@ -322,7 +329,7 @@ INSERT INTO Purchases (customer, order_date, purchases_address, product_referenc
 	sum(a.QUANTITY) as amount,
 	to_date(a.PAYMENT_DATE,'yyyy/mm/dd') as payment_date,
 	a.PAYMENT_TYPE as payment_type,
-	a.CARD_NUMBER as card_data,
+	TRIM(a.CARD_NUMBER) as card_data,
 	sum(to_number(replace(TRIM(REGEXP_REPLACE (a.BASE_PRICE, '[[:alpha:]]','')),'.',','))*to_number(QUANTITY)) as total_price
 	from fsdb.trolley a where a.barcode not like '%Q Q77433Q270983%'
     group by NVL(a.CLIENT_EMAIL, a.CLIENT_MOBILE), TO_DATE(ORDERDATE, 'YYYY/MM/DD'), TRIM(',' FROM
@@ -356,10 +363,18 @@ INSERT INTO Purchases (customer, order_date, purchases_address, product_referenc
                     ),
                     CASE WHEN TRIM(dliv_country) IS NOT NULL THEN TRIM(dliv_country) ELSE '' END
                 ), ''), '')
-    ), a.barcode, to_date(a.PAYMENT_DATE,'yyyy/mm/dd'), a.PAYMENT_TYPE, a.CARD_NUMBER;
+    ), a.barcode, to_date(a.PAYMENT_DATE,'yyyy/mm/dd'), a.PAYMENT_TYPE, TRIM(a.CARD_NUMBER);
 
 
 -- Opinions_References
+/*
+To insert the opinios, we had to re-create the table for the Opinions, as we had previously given the text a size of 255
+when in reality, in the original database, the text was 2000 characters long.
+We have to take only the usernames that are inside the resistered_clients_informations table, as we have a foreign key
+to the username.
+We also have to take the barcode from the product_references table, as we have a foreign key to the barcode.
+In this specific tables, we concatenated the date and time of the post to create a date.
+*/
 INSERT INTO Opinions_References(registered_client, product_reference, score, text_opinion, likes, endorsement, references_date)
     select 
     A.USERNAME,
@@ -376,6 +391,11 @@ INSERT INTO Opinions_References(registered_client, product_reference, score, tex
 
 
 -- Opinions_Products
+/*
+To insert the opinios, we had to re-create the table for the Opinions, as we did for the previous table.
+The only difference is that we have to take the product from the products table, as we have a foreign key
+to the product instead of the reference.
+ */
 INSERT INTO Opinions_Products(registered_client, product, score, text_opinion, likes, endorsement, products_date)
     select 
     A.USERNAME,
