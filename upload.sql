@@ -271,6 +271,17 @@ INSERT INTO Clients (main_contact, alt_contact, registered_client_information)
 
 
 -- Purchases
+/*
+To insert the purchases, we had to identify each of the foreign keys as we did in their respective tables, plus the other attributes. That means:
+1. For customer (identified by email/phone) we had to choose the first not null option (NVL)
+2. For order date, we gave it a date format (part of delivery primary key). We also did this for payment date.
+3. For the purchase address, we concatenated all the fields that compose an address. (part of delivery primary key)
+4. For the product reference, payment type and card data, we just imported the values.
+5. For amount and total price, we summed the values of all the purchases (explicit request by the client) into a single purchases.
+6. In order for the previous sum to work, we used group by to group all the rows.
+7. We found a deleted reference inside the data base. Since the client didn't specify, we choose to take it away from the import of values since 
+   it is just one deleted reference (where a.barcode not like '%Q Q77433Q270983%').
+*/
 INSERT INTO Purchases (customer, order_date, purchases_address, product_reference, amount, payment_date, payment_type, card_data, total_price)
 	select distinct
 	NVL(a.CLIENT_EMAIL, a.CLIENT_MOBILE) as customer,
