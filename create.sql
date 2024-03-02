@@ -83,7 +83,7 @@ Create Table Providers(
     sales_email CHAR(60) NOT NULL,
     provider_address CHAR(120) NOT NULL,    
     CONSTRAINT PK_cif PRIMARY KEY (CIF),
-    CONSTRAINT CK_cif_letter CHECK (REGEXP_LIKE(CIF, '[A-Z][0-9]{8}')),
+    CONSTRAINT CK_cif_letter CHECK (REGEXP_LIKE(CIF, '^[A-Z][0-9]{8}[A-Z]$')),
     CONSTRAINT CK_sales_phone CHECK (REGEXP_LIKE(sales_phone, '^[0-9]+$'))
     /*
     We know that all the atributes are unique but we are not going to mark them all as unique,

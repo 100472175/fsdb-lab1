@@ -1,4 +1,10 @@
--- 1st Insert into products
+-- 1st INSERT INTO products
+/*
+We observed in the original database, the roating types were the correct ones
+except for mixture, which was stated as blend.
+We also observed that the decaffeinated column was stated as yes or no, so we
+changed it to 1 or 0.
+*/
 INSERT INTO PRODUCTS(name, species, variety, origin, roasting, decaffeinated)
     SELECT distinct
         product,
@@ -23,7 +29,11 @@ INSERT INTO PRODUCTS(name, species, variety, origin, roasting, decaffeinated)
         AND decaf IS NOT NULL;
 
 
--- 2nd Insert into Formats
+-- 2nd INSERT INTO Formats
+/*
+We had some problems with the format, thus this special formating, for example, 
+the original database showed roasted bean and we had to change it to roasted beans.
+*/
 INSERT INTO FORMATS(format_type_f, amount)
     SELECT distinct
         CASE 
@@ -39,7 +49,12 @@ INSERT INTO FORMATS(format_type_f, amount)
         where FORMAT is not null 
         and packaging is not null;
 
--- 3th Insert into Product References
+
+-- 3th INSERT INTO Product References
+/*
+We had the same problem with the format, as the previous insertion.
+We also checked the base price to be a number and the stock to be a number.
+*/
 INSERT INTO Product_References (barcode, product, format_format_type, format_amount, price, stock, min_stock, max_stock)
     Select distinct
         barcode,
@@ -65,14 +80,14 @@ INSERT INTO Product_References (barcode, product, format_format_type, format_amo
                         and MIN_STOCK is not null
                         and MAX_STOCK is not null;
 
--- 4th Insert into Providers
+
+-- 4th INSERT INTO Providers
 INSERT INTO Providers (CIF, provider_name, sales_phone, sales_email, sales_name, provider_address)
     Select distinct
         PROV_TAXID, 
         SUPPLIER,
         PROV_MOBILE,
         PROV_EMAIL,
-        --PROV_BANKACC,
         PROV_PERSON,
         PROV_ADDRESS
     from fsdb.catalogue where PROV_TAXID is not null 
@@ -86,10 +101,9 @@ INSERT INTO Providers (CIF, provider_name, sales_phone, sales_email, sales_name,
 
 -- 5th insert Addresses
 /*
-Comments: 
-    - We are taking the n/n from the bill_gate and substituting it for null.
-    - We are also taking the floor and substituting it for a number, if it is a number, or null if it is not.
-    - We are taking the city and country and joining them together to generate the city_country.
+- We are taking the n/n from the bill_gate and substituting it for null.
+- We are also taking the floor and substituting it for a number, if it is a number, or null if it is not.
+- We are taking the city and country and joining them together to generate the city_country.
 */
 INSERT INTO Addresses (username, street_type, street_name, gateway_num, block_num, stairs_id, floor, door, ZIP_code, city_country)
     select distinct
@@ -144,7 +158,10 @@ SELECT DISTINCT
 
 
 
--- 7th Insert into Product Providers
+-- 7th INSERT INTO Product Providers
+/*
+We had to change the price of some products, as they were more than once in the database, choosing the lowest price.
+*/
 INSERT INTO Providers_References(provider_cif, product_reference, price)
     Select distinct
         PROV_TAXID,
@@ -162,10 +179,10 @@ INSERT INTO Providers_References(provider_cif, product_reference, price)
                         and cost_price is not null;
 
 
-
-
-
 -- Deliveries
+/*
+To insert the address, we had to concatenate all the fields if they were not null, separated by commas if necessary.
+*/
 INSERT INTO Deliveries (order_date, delivery_address)
 SELECT DISTINCT
     TO_DATE(ORDERDATE, 'YYYY/MM/DD') AS order_date,
@@ -204,13 +221,7 @@ SELECT DISTINCT
 FROM fsdb.trolley;
 
 
-
-
-
-
-
 -- Registered_Clients_Informations
-
 INSERT INTO Registered_Clients_Informations (username, client_password, registration_date, peronal_data, loyal_discount)
     SELECT
         username,
@@ -231,7 +242,6 @@ INSERT INTO Registered_Clients_Informations (username, client_password, registra
         username;
             
 
-
 -- Credit_Cards
 INSERT INTO Credit_Cards (card_number, expiration_date, holder, finance_company, username)
 Select distinct
@@ -247,22 +257,21 @@ from fsdb.trolley where card_number is not null AND (length(card_number) > 0)
                     and username is not null;
 
 
-
 -- Clients
-insert into Clients (main_contact, alt_contact, registered_client_information)
+INSERT INTO Clients (main_contact, alt_contact, registered_client_information)
 	select
-    NVL(a.CLIENT_EMAIL, a.CLIENT_MOBILE) as main_contact,
+    NVL(CLIENT_EMAIL, CLIENT_MOBILE) as main_contact,
     CASE 
-        WHEN a.CLIENT_EMAIL IS NOT NULL THEN a.CLIENT_MOBILE
+        WHEN CLIENT_EMAIL IS NOT NULL THEN CLIENT_MOBILE
         ELSE NULL
     END as alt_contact,
-    a.USERNAME registered_client_information
-	from fsdb.trolley a
-	group by a.CLIENT_EMAIL ,a.CLIENT_MOBILE , a.USERNAME;
+    USERNAME registered_client_information
+	from fsdb.trolley 
+	group by CLIENT_EMAIL ,CLIENT_MOBILE , USERNAME;
 
 
 -- Purchases
-insert into Purchases (customer, order_date, purchases_address, product_reference, amount, payment_date, payment_type, card_data, total_price)
+INSERT INTO Purchases (customer, order_date, purchases_address, product_reference, amount, payment_date, payment_type, card_data, total_price)
 	select distinct
 	NVL(a.CLIENT_EMAIL, a.CLIENT_MOBILE) as customer,
 	TO_DATE(ORDERDATE, 'YYYY/MM/DD') as order_date,
@@ -336,9 +345,8 @@ insert into Purchases (customer, order_date, purchases_address, product_referenc
                     ),
                     CASE WHEN TRIM(dliv_country) IS NOT NULL THEN TRIM(dliv_country) ELSE '' END
                 ), ''), '')
-    ), a.barcode, to_date(a.PAYMENT_DATE,'yyyy/mm/dd'), a.PAYMENT_TYPE, a.CARD_NUMBER
-    --HAVING COUNT(distinct to_date(a.PAYMENT_DATE,'yyyy/mm/dd')) > 1
-	;
+    ), a.barcode, to_date(a.PAYMENT_DATE,'yyyy/mm/dd'), a.PAYMENT_TYPE, a.CARD_NUMBER;
+
 
 -- Opinions_References
 INSERT INTO Opinions_References(registered_client, product_reference, score, text_opinion, likes, endorsement, references_date)
@@ -354,6 +362,7 @@ INSERT INTO Opinions_References(registered_client, product_reference, score, tex
         Registered_Clients_Informations B,
         Product_References C
     where A.USERNAME = B.username and A.BARCODE = C.barcode;
+
 
 -- Opinions_Products
 INSERT INTO Opinions_Products(registered_client, product, score, text_opinion, likes, endorsement, products_date)
@@ -371,20 +380,4 @@ INSERT INTO Opinions_Products(registered_client, product, score, text_opinion, l
     where A.USERNAME = B.username and A.product = C.name;
 
 
-/*
-Check wich ones had problems, aka, there are two prices for the same cif and barcode.
-Select PROV_TAXID, barcode, cost_price 
-    from fsdb.catalogue 
-        where barcode IN 
-        ('QOO64416O550165',
-         'IIO51869I990018',
-         'OQI13224O987826',
-         'OII22831Q738220',
-         'QII47432I109160');
-
-V16878068R OII22831Q738220 18.03 ? --
-D14430184F IIO51869I990018 81.13 ?--
-B29558354L OQI13224O987826 3.42 ? --
-N13525202Y QOO64416O550165 5.56 ? --
-R63301935R QII47432I109160 5.63 ? --
-*/
+commit;
