@@ -166,9 +166,9 @@ INSERT INTO Providers_References(provider_cif, product_reference, price)
 
 
 -- Deliveries
-INSERT INTO Deliveries (delivery_date, delivery_address)
+INSERT INTO Deliveries (order_date, delivery_address)
 SELECT DISTINCT
-    TO_DATE(dliv_date, 'YYYY/MM/DD') AS delivery_date,
+    TO_DATE(ORDERDATE, 'YYYY/MM/DD') AS order_date,
      TRIM(',' FROM
         CONCAT(
             CONCAT(
@@ -181,7 +181,7 @@ SELECT DISTINCT
                                         CONCAT(
                                             CONCAT(
                                                 CONCAT(
-                                                    CASE WHEN TRIM(dliv_waytype) IS NOT NULL THEN TRIM(dliv_waytype) ELSE '' END,
+                                                    CASE WHEN TRIM(dliv_waytype) IS NOT NULL THEN TRIM(dliv_waytype) || ' ' ELSE '' END,
                                                     CASE WHEN TRIM(dliv_wayname) IS NOT NULL THEN TRIM(dliv_wayname) || ', ' ELSE '' END
                                                 ),
                                                 CASE WHEN TRIM(dliv_gate) IS NOT NULL THEN TRIM(dliv_gate) || ', ' ELSE '' END
@@ -201,8 +201,7 @@ SELECT DISTINCT
                     CASE WHEN TRIM(dliv_country) IS NOT NULL THEN TRIM(dliv_country) ELSE '' END
                 ), ''), '')
     ) AS delivery_address
-FROM fsdb.trolley
-WHERE dliv_date IS NOT NULL;
+FROM fsdb.trolley;
 
 
 
@@ -263,25 +262,83 @@ insert into Clients (main_contact, alt_contact, registered_client_information)
 
 
 -- Purchases
-insert into Purchases(
+insert into Purchases (customer, order_date, purchases_address, product_reference, amount, payment_date, payment_type, card_data, total_price)
 	select distinct
-		NVL(a.CLIENT_EMAIL, a.CLIENT_MOBILE) as customer,
-	CASE 
-		WHEN a.CLIENT_EMAIL IS NOT NULL THEN NVL(a.CLIENT_MOBILE,'#') 
-		ELSE '#' 
-			END as mobile,
-	to_date(a.DLIV_DATE,'yyyy/mm/dd') delivery_date,
-	RTRIM(LTRIM(DLIV_WAYTYPE))||RTRIM(LTRIM(DLIV_WAYNAME))||NVL2(DLIV_GATE,', '||RTRIM(LTRIM(DLIV_GATE)),'')||NVL2(DLIV_BLOCK,', '||RTRIM(LTRIM(DLIV_BLOCK)),'')||NVL2(DLIV_STAIRW, ', '||RTRIM(LTRIM(DLIV_STAIRW)),'')||NVL2(DLIV_FLOOR,', '||RTRIM(LTRIM(DLIV_FLOOR)),'')||NVL2(DLIV_ZIP,  ', '||RTRIM(LTRIM(DLIV_ZIP)),'')||NVL2(DLIV_TOWN,  ', '||RTRIM(LTRIM(DLIV_TOWN)),'')||NVL2(DLIV_COUNTRY,  ', '||RTRIM(LTRIM(DLIV_COUNTRY)),'') purchases_address,
-	a.barcode product_reference,
-	a.QUANTITY amount,
-	to_date(a.PAYMENT_DATE||' '||a.PAYMENT_TIME,'yyyy/mm/dd hh:mi:ss pm') payment_date,
-	a.PAYMENT_TYPE payment_type,
-	a.CARD_NUMBER card_data,
-	to_number(replace(TRIM(REGEXP_REPLACE (a.BASE_PRICE, '[[:alpha:]]','')),'.',','))*to_number(QUANTITY) total_price
-	from fsdb.trolley A, Deliveries b
-	where b.delivery_date = to_date(a.DLIV_DATE,'yyyy-mm-dd')
-	and b.delivery_address = RTRIM(LTRIM(DLIV_WAYTYPE))||RTRIM(LTRIM(DLIV_WAYNAME))||NVL2(DLIV_GATE,', '||RTRIM(LTRIM(DLIV_GATE)),'')||NVL2(DLIV_BLOCK,', '||RTRIM(LTRIM(DLIV_BLOCK)),'')||NVL2(DLIV_STAIRW,', '||RTRIM(LTRIM(DLIV_STAIRW)),'')||NVL2(DLIV_FLOOR,', '||RTRIM(LTRIM(DLIV_FLOOR)),'')||NVL2(DLIV_ZIP,', '||RTRIM(LTRIM(DLIV_ZIP)),'')||NVL2(DLIV_TOWN,', '||RTRIM(LTRIM(DLIV_TOWN)),'')||NVL2(DLIV_COUNTRY,', '||RTRIM(LTRIM(DLIV_COUNTRY)),'')
-);
+	NVL(a.CLIENT_EMAIL, a.CLIENT_MOBILE) as customer,
+	TO_DATE(ORDERDATE, 'YYYY/MM/DD') as order_date,
+    TRIM(',' FROM
+        CONCAT(
+            CONCAT(
+                CONCAT(
+                    CONCAT(
+                        CONCAT(
+                            CONCAT(
+                                CONCAT(
+                                    CONCAT(
+                                        CONCAT(
+                                            CONCAT(
+                                                CONCAT(
+                                                    CASE WHEN TRIM(dliv_waytype) IS NOT NULL THEN TRIM(dliv_waytype) || ' ' ELSE '' END,
+                                                    CASE WHEN TRIM(dliv_wayname) IS NOT NULL THEN TRIM(dliv_wayname) || ', ' ELSE '' END
+                                                ),
+                                                CASE WHEN TRIM(dliv_gate) IS NOT NULL THEN TRIM(dliv_gate) || ', ' ELSE '' END
+                                            ),
+                                            CASE WHEN TRIM(dliv_block) IS NOT NULL THEN TRIM(dliv_block) || ', ' ELSE '' END
+                                        ),
+                                        CASE WHEN TRIM(dliv_stairw) IS NOT NULL THEN TRIM(dliv_stairw) || ', ' ELSE '' END
+                                    ),
+                                    CASE WHEN TRIM(dliv_floor) IS NOT NULL THEN TRIM(dliv_floor) || ', ' ELSE '' END
+                                ),
+                                CASE WHEN TRIM(dliv_door) IS NOT NULL THEN TRIM(dliv_door) || ', ' ELSE '' END
+                            ),
+                            CASE WHEN TRIM(dliv_zip) IS NOT NULL THEN TRIM(dliv_zip) || ', ' ELSE '' END
+                        ),
+                        CASE WHEN TRIM(dliv_town) IS NOT NULL THEN TRIM(dliv_town) || ', ' ELSE '' END
+                    ),
+                    CASE WHEN TRIM(dliv_country) IS NOT NULL THEN TRIM(dliv_country) ELSE '' END
+                ), ''), '')
+    ) as purchases_address,
+	a.barcode as product_reference,
+	sum(a.QUANTITY) as amount,
+	to_date(a.PAYMENT_DATE,'yyyy/mm/dd') as payment_date,
+	a.PAYMENT_TYPE as payment_type,
+	a.CARD_NUMBER as card_data,
+	sum(to_number(replace(TRIM(REGEXP_REPLACE (a.BASE_PRICE, '[[:alpha:]]','')),'.',','))*to_number(QUANTITY)) as total_price
+	from fsdb.trolley a where a.barcode not like '%Q Q77433Q270983%'
+    group by NVL(a.CLIENT_EMAIL, a.CLIENT_MOBILE), TO_DATE(ORDERDATE, 'YYYY/MM/DD'), TRIM(',' FROM
+        CONCAT(
+            CONCAT(
+                CONCAT(
+                    CONCAT(
+                        CONCAT(
+                            CONCAT(
+                                CONCAT(
+                                    CONCAT(
+                                        CONCAT(
+                                            CONCAT(
+                                                CONCAT(
+                                                    CASE WHEN TRIM(dliv_waytype) IS NOT NULL THEN TRIM(dliv_waytype) || ' ' ELSE '' END,
+                                                    CASE WHEN TRIM(dliv_wayname) IS NOT NULL THEN TRIM(dliv_wayname) || ', ' ELSE '' END
+                                                ),
+                                                CASE WHEN TRIM(dliv_gate) IS NOT NULL THEN TRIM(dliv_gate) || ', ' ELSE '' END
+                                            ),
+                                            CASE WHEN TRIM(dliv_block) IS NOT NULL THEN TRIM(dliv_block) || ', ' ELSE '' END
+                                        ),
+                                        CASE WHEN TRIM(dliv_stairw) IS NOT NULL THEN TRIM(dliv_stairw) || ', ' ELSE '' END
+                                    ),
+                                    CASE WHEN TRIM(dliv_floor) IS NOT NULL THEN TRIM(dliv_floor) || ', ' ELSE '' END
+                                ),
+                                CASE WHEN TRIM(dliv_door) IS NOT NULL THEN TRIM(dliv_door) || ', ' ELSE '' END
+                            ),
+                            CASE WHEN TRIM(dliv_zip) IS NOT NULL THEN TRIM(dliv_zip) || ', ' ELSE '' END
+                        ),
+                        CASE WHEN TRIM(dliv_town) IS NOT NULL THEN TRIM(dliv_town) || ', ' ELSE '' END
+                    ),
+                    CASE WHEN TRIM(dliv_country) IS NOT NULL THEN TRIM(dliv_country) ELSE '' END
+                ), ''), '')
+    ), a.barcode, to_date(a.PAYMENT_DATE,'yyyy/mm/dd'), a.PAYMENT_TYPE, a.CARD_NUMBER
+    --HAVING COUNT(distinct to_date(a.PAYMENT_DATE,'yyyy/mm/dd')) > 1
+	;
 
 -- Opinions_References
 INSERT INTO Opinions_References(registered_client, product_reference, score, text_opinion, likes, endorsement, references_date)

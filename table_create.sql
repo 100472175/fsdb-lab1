@@ -149,13 +149,13 @@ Create Table Providers_References(
 
 
 /*
-The deliveries table is a combination of the delivery_date and the delivery_address, which is unique.
+The deliveries table is a combination of the order_date and the delivery_address, which is unique.
 */
 
 CREATE TABLE Deliveries(
-    delivery_date DATE NOT NULL,
+    order_date DATE NOT NULL,
     delivery_address VARCHAR2(120) NOT NULL,
-    CONSTRAINT PK_Deliveries PRIMARY KEY (delivery_date, delivery_address)
+    CONSTRAINT PK_Deliveries PRIMARY KEY (order_date, delivery_address)
 );
 
 
@@ -217,8 +217,7 @@ Create Table Clients(
 
 Create Table Purchases(
     customer VARCHAR(255) NOT NULL,
-	mobile VARCHAR(255) NOT NULL,
-    delivery_date DATE NOT NULL,
+    order_date DATE NOT NULL,
     purchases_address VARCHAR2(120) NOT NULL,
     product_reference CHAR(15) NOT NULL,
     amount NUMBER NOT NULL,
@@ -226,9 +225,9 @@ Create Table Purchases(
     payment_type VARCHAR(255) NOT NULL,
     card_data CHAR(20),
     total_price NUMBER(15,2) NOT NULL,
-    CONSTRAINT PK_purchases PRIMARY KEY (customer, mobile, delivery_date, purchases_address, product_reference),
+    CONSTRAINT PK_purchases PRIMARY KEY (customer, order_date, purchases_address, product_reference),
     CONSTRAINT FK_purchases_customer FOREIGN KEY (customer) REFERENCES Clients(main_contact),
-    CONSTRAINT FK_purchases_divery_adress FOREIGN KEY (delivery_date, purchases_address) REFERENCES Deliveries(delivery_date, delivery_address),
+    CONSTRAINT FK_purchases_delivery_address FOREIGN KEY (order_date, purchases_address) REFERENCES Deliveries(order_date, delivery_address),
     CONSTRAINT FK_purchases_product_reference FOREIGN KEY (product_reference) REFERENCES Product_References(barcode)
 );
 
