@@ -222,7 +222,7 @@ FROM fsdb.trolley;
 
 
 -- Registered_Clients_Informations
-INSERT INTO Registered_Clients_Informations (username, client_password, registration_date, peronal_data, loyal_discount)
+INSERT INTO Registered_Clients_Informations (username, client_password, registration_date, personal_data, loyal_discount)
     SELECT
         username,
         MIN(user_passw) AS user_passw,

@@ -157,10 +157,10 @@ The main is the one that will be always populated, and if the alternative is pop
 */
 create Table Registered_Clients_Informations(
     username CHAR(30) NOT NULL,
-    client_password VARCHAR(255) NOT NULL,
+    client_password VARCHAR(15) NOT NULL,
     registration_date DATE NOT NULL,
-    peronal_data VARCHAR(255) NOT NULL,
-    loyal_discount VARCHAR(255),
+    personal_data VARCHAR(85) NOT NULL,
+    loyal_discount VARCHAR(20),
     CONSTRAINT PK_rci PRIMARY KEY (username)
     -- CONSTRAINT CK_loyal_discount CHECK (loyal_discount <= SYSDATE AND loyal_discount >= SYSDATE - 30)
 );
@@ -175,11 +175,11 @@ Create Table Discounts(
 );
 */
 Create Table Credit_Cards(
-    card_number CHAR(20) NOT NULL,
+    card_number CHAR(12) NOT NULL,
     username CHAR(30) NOT NULL,
     expiration_date DATE NOT NULL,
-    holder VARCHAR(255) NOT NULL,
-    finance_company VARCHAR(255) NOT NULL,
+    holder VARCHAR(30) NOT NULL,
+    finance_company VARCHAR(15) NOT NULL,
     CONSTRAINT PK_Credit_card PRIMARY KEY (card_number),
     CONSTRAINT FK_username FOREIGN KEY (username) REFERENCES Registered_Clients_Informations(username)
     );
@@ -207,13 +207,13 @@ Then, it also stores the amount, total price and payment type as compulsory attr
 As optional attributes, it stores the payment date and the card data, as it may not exist.
 */
 Create Table Purchases(
-    customer VARCHAR(255) NOT NULL,
+    customer VARCHAR(60) NOT NULL,
     order_date DATE NOT NULL,
     purchases_address VARCHAR2(120) NOT NULL,
     product_reference CHAR(15) NOT NULL,
     amount NUMBER NOT NULL,
     payment_date DATE,
-    payment_type VARCHAR(255) NOT NULL,
+    payment_type VARCHAR(15) NOT NULL,
     card_data CHAR(20),
     total_price NUMBER(15,2) NOT NULL,
     CONSTRAINT PK_purchases PRIMARY KEY (customer, order_date, purchases_address, product_reference),
