@@ -14,14 +14,11 @@ drop table Formats;
 drop table Products;
 
 
--- TODO: Naming all constraints
-
 /*
 The Products table has all the columns with Varchar 255 because we don't know the maximum length of the values.
 Except for the decaffeinated column, which is a number 1 (== True) if it is decaffeinated and 0 (== False) if it is not.
 And the primary key is the name of the product, which is unique.
 */
-
 CREATE TABLE Products(
     name CHAR(50) NOT NULL,
     species CHAR(20) NOT NULL,
@@ -39,7 +36,6 @@ CREATE TABLE Products(
 The Formats table had to have it's first atribure renamed because it was a reserved word in SQL.
 And the primary key is the combination of the format_type and the amount, which is unique.
 */
-
 CREATE TABLE Formats(
     format_type_f CHAR(20) not null,
     amount CHAR(15) not null,
@@ -52,7 +48,6 @@ CREATE TABLE Formats(
 The Product_References is the table with the barcode, the product, the format etc.
 The barcode is the primary key, and the foreign keys are the product and the format(type and amount).
 */
-
 Create Table Product_References(
     barcode CHAR(15) NOT NULL,
     product CHAR(50) NOT NULL,
@@ -74,7 +69,6 @@ Create Table Product_References(
 The providers table has the CIF as the primary key.
 The only atribute we know the length of is the sales_phone, which is a char(9). 
 */
-
 Create Table Providers(
     CIF CHAR(10) NOT NULL,
     provider_name CHAR(35) NOT NULL,
@@ -117,7 +111,6 @@ Create Table Addresses(
 The replacement orders has the primary key as the reference, which is a foreign key to the Product_References table.
 The provider can be Null, as well as the receiving_date and the payment.
 */
-
 CREATE TABLE Replacement_Orders(
     order_date DATE NOT NULL,
     reference CHAR(15) NOT NULL,
@@ -133,9 +126,10 @@ CREATE TABLE Replacement_Orders(
 );
 
 /*
-
+The providers_references table has the combination of:
+the provider, which supplies the produce, 
+the reference, which is the produce it supplies to us and the price.
 */
-
 Create Table Providers_References(
     provider_cif char(10) not null,
     product_reference CHAR(15) NOT NULL,
@@ -147,11 +141,9 @@ Create Table Providers_References(
 );
 
 
-
 /*
 The deliveries table is a combination of the order_date and the delivery_address, which is unique.
 */
-
 CREATE TABLE Deliveries(
     order_date DATE NOT NULL,
     delivery_address VARCHAR2(120) NOT NULL,
@@ -163,7 +155,6 @@ CREATE TABLE Deliveries(
 Here, what we discus with the professor was applied. We cerated a contact_media and a contact_media_alternative.
 The main is the one that will be always populated, and if the alternative is populated, the main one will be phone and the second one the email.
 */
-
 create Table Registered_Clients_Informations(
     username CHAR(30) NOT NULL,
     client_password VARCHAR(255) NOT NULL,
@@ -175,7 +166,6 @@ create Table Registered_Clients_Informations(
 );
 
 
-
 /*
 -- After looking the statement again, it seems the voucher already has a date, so we don't need this table
 Create Table Discounts(
@@ -184,7 +174,6 @@ Create Table Discounts(
     PRIMARY KEY (voucher, date_voucher)
 );
 */
-
 Create Table Credit_Cards(
     card_number CHAR(20) NOT NULL,
     username CHAR(30) NOT NULL,
@@ -201,7 +190,6 @@ The client table, is a mixture of the registered and unregistered clients.
 The primary key is the main_contact, as it will be unique in both registered and unregistered clients.
 And the main information of the client is in the Registered_Clients_Informations table.
 */
-
 Create Table Clients(
     main_contact VARCHAR(60) NOT NULL,
     alt_contact VARCHAR(9),
@@ -212,9 +200,12 @@ Create Table Clients(
 
 
 /*
-
+The Purchases table is the main table of the database.
+It contains the costumer who has bought the product, independently whether it is a registered client or not,
+the delivery address and date as well as the reference of the product as the primary key.
+Then, it also stores the amount, total price and payment type as compulsory attributes.
+As optional attributes, it stores the payment date and the card data, as it may not exist.
 */
-
 Create Table Purchases(
     customer VARCHAR(255) NOT NULL,
     order_date DATE NOT NULL,
@@ -233,9 +224,8 @@ Create Table Purchases(
 
 
 /*
-
+We divided the Opinions table into two tables, one for the references and one for the products.
 */
-
 Create Table Opinions_References(
     registered_client CHAR(30) NOT NULL,
     score NUMBER NOT NULL,
@@ -251,10 +241,6 @@ Create Table Opinions_References(
     CONSTRAINT CK_opinions_references_likes_max CHECK (likes <= 1000000000)
 );
 
-
-/*
-
-*/
 
 Create Table Opinions_Products(
     registered_client CHAR(30) NOT NULL,
